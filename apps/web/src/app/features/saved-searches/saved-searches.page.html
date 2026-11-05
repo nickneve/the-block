@@ -1,0 +1,85 @@
+<div class="container page">
+  <header class="intro">
+    <p class="eyebrow">Your account</p>
+    <h1>Saved searches</h1>
+    <p class="lede muted">
+      Jump back into a search in one click. <strong>New</strong> counts lots listed in the last 24 hours.
+    </p>
+  </header>
+
+  @if (!saved.loaded()) {
+    <div class="list" aria-busy="true">
+      @for (placeholder of [1, 2, 3]; track placeholder) {
+        <div class="skeleton" style="height: 104px; border-radius: 16px"></div>
+      }
+    </div>
+  } @else if (rows().length === 0) {
+    <div class="empty">
+      <svg appIcon="bookmark" [size]="34" [strokeWidth]="1.6"></svg>
+      <h2>No saved searches yet</h2>
+      <p class="muted">
+        Search or filter on Browse, then choose <strong>Save search</strong>. You'll be able to come back to it in one
+        click, with a count of what's new each time.
+      </p>
+      <a class="btn btn--primary" routerLink="/">Browse auctions</a>
+    </div>
+  } @else {
+    <p class="summary muted">
+      <span class="tabular">{{ saved.count() }}</span> of {{ limit }} saved
+      @if (saved.newCount() > 0) {
+        · <strong class="tabular">{{ saved.newCount() }}</strong> new {{ saved.newCount() === 1 ? 'match' : 'matches' }}
+      }
+    </p>
+
+    <ul class="list">
+      @for (row of rows(); track row.search.id) {
+        <li class="card row">
+          <span class="icon" aria-hidden="true"><svg appIcon="bookmark" [size]="20" [strokeWidth]="2"></svg></span>
+
+          <div class="info">
+            <a class="title" routerLink="/" [queryParams]="row.search.query">{{ row.search.name }}</a>
+            <ul class="criteria" aria-label="Criteria">
+              @for (part of row.criteria; track part) {
+                <li class="chip">{{ part }}</li>
+              }
+            </ul>
+            <p class="saved-ago">Saved {{ row.savedAgo }}</p>
+          </div>
+
+          <dl class="numbers">
+            <div>
+              <dt>Matches</dt>
+              <dd class="tabular">{{ row.search.matchCount }}</dd>
+            </div>
+            <div>
+              <dt>New</dt>
+              <dd class="tabular" [class.has-new]="row.search.newCount > 0">{{ row.search.newCount }}</dd>
+            </div>
+          </dl>
+
+          <div class="actions">
+            <a class="btn btn--primary btn--sm" routerLink="/" [queryParams]="row.search.query">View results</a>
+            <button
+              type="button"
+              class="icon-btn"
+              [attr.aria-label]="'Rename ' + row.search.name"
+              title="Rename"
+              (click)="rename(row)"
+            >
+              <svg appIcon="pencil" [size]="17"></svg>
+            </button>
+            <button
+              type="button"
+              class="icon-btn"
+              [attr.aria-label]="'Delete ' + row.search.name"
+              title="Delete"
+              (click)="remove(row.search)"
+            >
+              <svg appIcon="trash-2" [size]="18"></svg>
+            </button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>

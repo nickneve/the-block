@@ -1,0 +1,167 @@
+@let q = query();
+@let f = facets();
+@let counts = statusCounts();
+<div class="panel">
+  <fieldset class="group">
+    <legend class="eyebrow">Auction</legend>
+    <div class="checks">
+      @for (option of statusOptions; track option.value) {
+        <label class="check">
+          <input type="radio" name="auction-status" [checked]="q.status === option.value" (change)="setStatus(option.value)" />
+          <span>{{ option.label }}</span>
+          @if (counts) {
+            <span class="count tabular">{{ counts[option.count] }}</span>
+          }
+        </label>
+      }
+    </div>
+  </fieldset>
+
+  <fieldset class="group">
+    <legend class="eyebrow">Show only</legend>
+    <div class="checks">
+      @for (option of flagOptions; track option.key) {
+        @let count = f?.flags?.[option.count];
+        <label class="check" [class.is-empty]="count === 0 && !q[option.key]">
+          <input
+            type="checkbox"
+            [checked]="q[option.key]"
+            [disabled]="count === 0 && !q[option.key]"
+            (change)="setFlag(option.key, $event)"
+          />
+          <span>{{ option.label }}</span>
+          @if (count !== undefined) {
+            <span class="count tabular">{{ count }}</span>
+          }
+        </label>
+      }
+    </div>
+  </fieldset>
+
+  @if (f) {
+    <fieldset class="group">
+      <legend class="eyebrow">Body style</legend>
+      <div class="pills">
+        @for (option of f.bodyStyles; track option.value) {
+          <button
+            type="button"
+            class="pill"
+            [class.is-empty]="option.count === 0"
+            [disabled]="option.count === 0 && !has('bodyStyle', option.value)"
+            [attr.aria-pressed]="has('bodyStyle', option.value)"
+            (click)="toggle('bodyStyle', option.value)"
+          >
+            {{ option.value | humanize }} <span class="count">{{ option.count }}</span>
+          </button>
+        }
+      </div>
+    </fieldset>
+
+    <fieldset class="group">
+      <legend class="eyebrow">Make</legend>
+      <div class="checks">
+        @for (option of visibleMakes(); track option.value) {
+          <label class="check" [class.is-empty]="option.count === 0 && !has('make', option.value)">
+            <input
+              type="checkbox"
+              [checked]="has('make', option.value)"
+              [disabled]="option.count === 0 && !has('make', option.value)"
+              (change)="toggle('make', option.value)"
+            />
+            <span>{{ option.value }}</span>
+            <span class="count tabular">{{ option.count }}</span>
+          </label>
+        }
+      </div>
+      @if (f.makes.length > visibleMakes().length || showAllMakes()) {
+        <button type="button" class="link-btn more" (click)="showAllMakes.set(!showAllMakes())">
+          {{ showAllMakes() ? 'Show fewer makes' : 'Show all ' + f.makes.length + ' makes' }}
+        </button>
+      }
+    </fieldset>
+
+    <div class="group selects">
+      <label class="field">
+        <span class="eyebrow">Max price</span>
+        <select class="select" (change)="setNumber('priceMax', $event)">
+          <option value="" [selected]="q.priceMax === null">Any price</option>
+          @for (value of priceOptions; track value) {
+            <option [value]="value" [selected]="q.priceMax === value">Under {{ value | money }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="field">
+        <span class="eyebrow">Year</span>
+        <select class="select" (change)="setNumber('yearMin', $event)">
+          <option value="" [selected]="q.yearMin === null">Any year</option>
+          @for (value of yearOptions(); track value) {
+            <option [value]="value" [selected]="q.yearMin === value">{{ value }} &amp; newer</option>
+          }
+        </select>
+      </label>
+
+      <label class="field">
+        <span class="eyebrow">Mileage</span>
+        <select class="select" (change)="setNumber('maxKm', $event)">
+          <option value="" [selected]="q.maxKm === null">Any mileage</option>
+          @for (value of kmOptions; track value) {
+            <option [value]="value" [selected]="q.maxKm === value">Under {{ value / 1000 }}k km</option>
+          }
+        </select>
+      </label>
+
+      <label class="field">
+        <span class="eyebrow">Condition</span>
+        <select class="select" (change)="setNumber('minGrade', $event)">
+          <option value="" [selected]="q.minGrade === null">Any condition</option>
+          @for (option of gradeOptions; track option.value) {
+            <option [value]="option.value" [selected]="q.minGrade === option.value">{{ option.label }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <fieldset class="group">
+      <legend class="eyebrow">Fuel type</legend>
+      <div class="pills">
+        @for (option of f.fuelTypes; track option.value) {
+          <button
+            type="button"
+            class="pill"
+            [class.is-empty]="option.count === 0"
+            [disabled]="option.count === 0 && !has('fuelType', option.value)"
+            [attr.aria-pressed]="has('fuelType', option.value)"
+            (click)="toggle('fuelType', option.value)"
+          >
+            {{ option.value | humanize }} <span class="count">{{ option.count }}</span>
+          </button>
+        }
+      </div>
+    </fieldset>
+
+    @for (group of checkGroups; track group.key) {
+      <fieldset class="group">
+        <legend class="eyebrow">{{ group.label }}</legend>
+        <div class="checks">
+          @for (option of f[group.facet]; track option.value) {
+            <label class="check" [class.is-empty]="option.count === 0 && !has(group.key, option.value)">
+              <input
+                type="checkbox"
+                [checked]="has(group.key, option.value)"
+                [disabled]="option.count === 0 && !has(group.key, option.value)"
+                (change)="toggle(group.key, option.value)"
+              />
+              <span>{{ group.key === 'titleStatus' ? (option.value | humanize) : option.value }}</span>
+              <span class="count tabular">{{ option.count }}</span>
+            </label>
+          }
+        </div>
+      </fieldset>
+    }
+  } @else {
+    @for (row of [1, 2, 3, 4]; track row) {
+      <div class="skeleton skeleton-row"></div>
+    }
+  }
+</div>

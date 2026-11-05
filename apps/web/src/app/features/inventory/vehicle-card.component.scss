@@ -1,0 +1,184 @@
+:host {
+  display: block;
+  height: 100%; // every card in a grid row lines up, even when one has an extra badge
+}
+
+.vehicle-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  color: inherit;
+  transition:
+    transform 0.2s var(--ease),
+    box-shadow 0.2s var(--ease),
+    border-color 0.2s var(--ease);
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow-md);
+  }
+
+  &:hover app-vehicle-image {
+    filter: brightness(1.04);
+  }
+
+  &.is-outbid {
+    border-color: color-mix(in srgb, var(--danger) 45%, var(--border));
+  }
+}
+
+// --- Photo and the tags on it ---------------------------------------------------
+
+.media {
+  position: relative;
+}
+
+.media-top,
+.media-bottom {
+  position: absolute;
+  left: var(--space-3);
+  right: var(--space-3);
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.media-top {
+  top: var(--space-3);
+  align-items: flex-start;
+}
+
+.media-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+}
+
+.media-bottom {
+  bottom: var(--space-3);
+  align-items: flex-end;
+}
+
+.bid-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+// Same dark glass as the timer chip, so price and time read as one system.
+.price-tag {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 6px 10px 7px;
+  border-radius: var(--radius-sm);
+  background: var(--overlay-chip);
+  color: #fff;
+  line-height: 1.15;
+  backdrop-filter: blur(6px);
+}
+
+.tag-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0.82;
+}
+
+.tag-amount {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+// Buy Now is an action price, so it carries the action colour.
+.price-tag--buy-now {
+  align-items: flex-end;
+  background: var(--cta);
+  color: var(--cta-contrast);
+
+  .tag-label {
+    opacity: 0.92;
+  }
+}
+
+// --- Details ------------------------------------------------------------------------
+
+.body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.title {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  color: var(--text-muted);
+  font-size: 13.5px;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 22px;
+    min-width: 0;
+  }
+
+  svg {
+    flex: none;
+    color: var(--text-subtle);
+  }
+
+  .chip {
+    margin-left: var(--space-1);
+  }
+
+  .place {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .distance {
+    flex: none;
+    color: var(--text);
+    font-weight: 600;
+  }
+}
+
+// Condition on the left, title on the right: two separate facts, given room.
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  margin-top: auto;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+}

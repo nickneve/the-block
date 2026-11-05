@@ -1,0 +1,106 @@
+@let v = vehicle();
+<article class="row" [class.is-outbid]="v.myStatus === 'outbid'">
+  <div class="photo">
+    <app-vehicle-image [src]="v.thumbnail" [alt]="title() + ' ' + v.trim" [paint]="v.exteriorColor" />
+    @if (isNew()) {
+      <span class="chip chip--new new"><svg appIcon="sparkles" [size]="12" [strokeWidth]="2.4"></svg>New</span>
+    }
+    <app-watch-button class="watch" [vehicleId]="v.id" variant="overlay" />
+  </div>
+
+  <div class="vehicle">
+    <h3 class="title">
+      <a class="row-link" [routerLink]="['/vehicles', v.id]">{{ title() }}</a>
+    </h3>
+    <p class="subtitle">{{ v.trim }} · Lot {{ v.lot }}</p>
+
+    <!-- Phones: the essentials as a few quiet lines instead of chips and columns. -->
+    <div class="compact">
+      <p class="odometer">
+        <span class="tabular">{{ v.odometerKm | km }}</span>
+        @if (reserve(); as reserve) {
+          <span class="chip chip--sm" [class.chip--primary]="reserve.tone === 'primary'">{{ reserve.text }}</span>
+        }
+      </p>
+      <p>
+        Grade <span class="tabular">{{ v.conditionGrade.toFixed(1) }}</span> ·
+        <span [class]="'title-' + v.titleStatus">{{ titleLabel() }}</span>
+      </p>
+      <p>
+        {{ v.city }}, {{ v.province | province }}
+        @if (distance(); as distance) {
+          · <span class="distance tabular">{{ distance }}</span>
+        }
+      </p>
+    </div>
+
+    <div class="tags">
+      <app-condition-grade [grade]="v.conditionGrade" />
+      <app-title-badge [status]="v.titleStatus" [showClean]="true" cleanTone="quiet" />
+      @if (reserve(); as reserve) {
+        <span class="chip" [class.chip--primary]="reserve.tone === 'primary'">{{ reserve.text }}</span>
+      }
+      <app-my-status-badge [status]="v.myStatus" />
+    </div>
+  </div>
+
+  <dl class="facts">
+    <div><dt>Odometer</dt><dd class="tabular">{{ v.odometerKm | km }}</dd></div>
+    <div><dt>Drive</dt><dd>{{ drive() }}</dd></div>
+    <div><dt>Fuel</dt><dd>{{ fuel() }}</dd></div>
+    <div>
+      <dt>Damage</dt>
+      <dd [class.clean]="v.damageCount === 0">{{ damage() }}</dd>
+    </div>
+  </dl>
+
+  <div class="sale">
+    <p class="location">
+      <svg appIcon="map-pin" [size]="14" [strokeWidth]="2"></svg>
+      <span>
+        {{ v.city }}, {{ v.province | province }}
+        @if (distance(); as distance) {
+          <strong class="distance">{{ distance }}</strong>
+        }
+      </span>
+    </p>
+    <p class="dealer">{{ v.sellingDealership }}</p>
+    <div class="timing">
+      <app-lot-status [auction]="v.auction" />
+      @if (v.auction.status === 'open') {
+        <span class="closes">Closes {{ closesAt() }}</span>
+      }
+    </div>
+  </div>
+
+  <div class="bid">
+    <div class="bid-price">
+      <p class="price-label">{{ priceLabel() }}</p>
+      <p class="price tabular">{{ price() | money }}</p>
+      <p class="price-sub">
+        <span class="tabular">{{ bids() }}</span>
+      </p>
+      <p class="estimate" title="Prototype estimate of today's value, from year, mileage, condition and title">
+        Est. value <span class="tabular">{{ v.marketValue.value | money }}</span>
+      </p>
+      @if (v.auction.buyNowAvailable && v.auction.buyNowPrice !== null) {
+        <p class="buy-now"><svg appIcon="zap" [size]="13" [strokeWidth]="2.4"></svg>Buy now {{ v.auction.buyNowPrice | money }}</p>
+      }
+    </div>
+    <app-lot-status class="compact-status" [auction]="v.auction" />
+    @if (v.auction.status === 'open') {
+      <!-- Orange marks the action; it's solid only when the buyer needs to act now. -->
+      <a
+        class="btn btn--sm bid-btn"
+        [class.btn--cta]="v.myStatus === 'outbid'"
+        [class.btn--cta-outline]="v.myStatus !== 'outbid'"
+        [routerLink]="['/vehicles', v.id]"
+        fragment="bid"
+      >
+        {{ v.myStatus === 'outbid' ? 'Bid again' : 'Bid now' }}
+      </a>
+    } @else {
+      <a class="btn btn--secondary btn--sm bid-btn" [routerLink]="['/vehicles', v.id]">View result</a>
+    }
+  </div>
+</article>

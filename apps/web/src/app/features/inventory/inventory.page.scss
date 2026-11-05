@@ -1,0 +1,753 @@
+$desktop: 1024px;
+
+:host {
+  display: block;
+  padding-bottom: var(--space-8);
+}
+
+// --- Intro & search --------------------------------------------------------
+
+.intro {
+  padding-top: var(--space-6);
+  padding-bottom: var(--space-5);
+
+  h1 {
+    font-size: clamp(28px, 4vw, 36px);
+    font-weight: 800;
+  }
+
+  @media (min-width: $desktop) {
+    padding-top: var(--space-7);
+  }
+}
+
+.lede {
+  margin-top: var(--space-2);
+  color: var(--text-muted);
+  font-size: 16px;
+
+  strong {
+    color: var(--text);
+    font-weight: 700;
+  }
+}
+
+.search-row {
+  display: flex;
+  gap: var(--space-2);
+  max-width: 820px;
+  margin-top: var(--space-5);
+}
+
+.search {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.search-icon {
+  position: absolute;
+  top: 50%;
+  left: 16px;
+  transform: translateY(-50%);
+  color: var(--text-subtle);
+  pointer-events: none;
+}
+
+.search-input {
+  height: 52px;
+  padding-left: 48px;
+  padding-right: 48px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+
+  &::-webkit-search-cancel-button {
+    display: none;
+  }
+}
+
+.search-clear {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+}
+
+// Quick access to saved searches, beside the box you search with.
+.saved-btn {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-2);
+  height: 52px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 0.15s var(--ease);
+
+  > svg:first-child {
+    color: var(--primary);
+  }
+
+  &:hover,
+  &[aria-expanded='true'] {
+    border-color: var(--border-strong);
+  }
+
+  @media (max-width: 767px) {
+    width: 52px;
+    padding: 0;
+    justify-content: center;
+    position: relative;
+
+    .saved-btn-label,
+    .saved-btn-caret {
+      display: none;
+    }
+  }
+}
+
+.saved-btn-new {
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--primary);
+  color: var(--primary-contrast);
+  font-size: 12px;
+  font-weight: 700;
+
+  // On phones the button is icon-only: the count becomes a small badge on the corner.
+  @media (max-width: 767px) {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    padding: 1px 6px;
+    font-size: 11px;
+  }
+}
+
+.saved-btn-caret {
+  color: var(--text-subtle);
+}
+
+// Menu contents (rendered in an overlay, but still scoped to this component).
+.saved-menu {
+  width: 340px;
+}
+
+.saved-item {
+  &.is-current {
+    background: var(--primary-soft);
+    color: var(--primary);
+  }
+}
+
+.saved-item-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.saved-item-counts {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+  color: var(--text-subtle);
+  font-size: 13px;
+
+  .menu-badge {
+    margin-left: 0;
+  }
+}
+
+.saved-empty {
+  max-width: 300px;
+  padding: 4px 10px 8px;
+  color: var(--text-muted);
+  font-size: 13.5px;
+  white-space: normal;
+}
+
+.sort-menu {
+  min-width: 230px;
+}
+
+.menu-check {
+  margin-left: auto;
+  color: var(--primary);
+}
+
+// --- Layout ----------------------------------------------------------------
+
+.layout {
+  @media (min-width: $desktop) {
+    display: grid;
+    grid-template-columns: 264px minmax(0, 1fr);
+    gap: var(--space-6);
+    align-items: start;
+  }
+}
+
+.filters {
+  // Mobile & tablet: a sheet that slides up from the bottom.
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  max-height: 88vh;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(105%);
+  visibility: hidden;
+  transition: transform 0.28s var(--ease), visibility 0s linear 0.28s;
+
+  &.open {
+    transform: translateY(0);
+    visibility: visible;
+    transition: transform 0.28s var(--ease);
+  }
+
+  @media (min-width: $desktop) {
+    position: sticky;
+    top: calc(var(--header-height) + var(--space-4));
+    z-index: auto;
+    max-height: calc(100vh - var(--header-height) - var(--space-6));
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    transform: none;
+    visibility: visible;
+    transition: none;
+  }
+}
+
+.filters-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 49;
+  background: var(--scrim);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s var(--ease);
+
+  &.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  @media (min-width: $desktop) {
+    display: none;
+  }
+}
+
+.filters-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 40px;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border);
+
+  .section-title {
+    margin-right: auto;
+  }
+
+  .close-sheet {
+    margin-right: calc(var(--space-2) * -1);
+  }
+
+  @media (min-width: $desktop) {
+    padding: 0 var(--space-2) var(--space-4) 0;
+    border-bottom: 0;
+
+    .close-sheet,
+    .sheet-clear {
+      display: none;
+    }
+  }
+}
+
+.sheet-foot {
+  padding: var(--space-3) var(--space-4);
+  padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--border);
+
+  @media (min-width: $desktop) {
+    display: none;
+  }
+}
+
+.filters-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-4);
+  overscroll-behavior: contain;
+
+  @media (min-width: $desktop) {
+    padding: 0 var(--space-2) var(--space-4) 0;
+    scrollbar-width: thin;
+  }
+}
+
+// --- Results ---------------------------------------------------------------
+
+.results {
+  min-width: 0;
+  container-type: inline-size; // list rows and the list header respond to this column's width
+}
+
+// Desktop: a single row of sort tabs. Phones and tablets: Filters · Sort · Save · layout.
+.results-head {
+  border-bottom: 1px solid var(--border);
+  scroll-margin-top: calc(var(--header-height) + var(--space-3));
+}
+
+.sort-tabs {
+  display: none;
+
+  @media (min-width: $desktop) {
+    display: flex;
+    align-items: stretch;
+    gap: 2px;
+  }
+}
+
+.tab {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  height: 46px;
+  margin-bottom: -1px;
+  padding: 0 var(--space-3);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color 0.15s var(--ease),
+    border-color 0.15s var(--ease);
+
+  &:hover {
+    color: var(--text);
+  }
+
+  &[aria-pressed='true'] {
+    border-bottom-color: var(--primary);
+    color: var(--text);
+  }
+
+  &:first-child {
+    padding-left: var(--space-1);
+  }
+}
+
+// "More" sits at the far end; once one of its sorts is chosen it shows that sort's name.
+.tab--more {
+  margin-left: auto;
+
+  svg {
+    color: var(--text-subtle);
+  }
+
+  &[aria-expanded='true'] {
+    color: var(--text);
+  }
+}
+
+.compact-tools {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-bottom: var(--space-3);
+
+  @media (min-width: $desktop) {
+    display: none;
+  }
+
+  .spacer {
+    flex: 1;
+  }
+}
+
+.count-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  background: var(--primary);
+  color: var(--primary-contrast);
+  font-size: 12px;
+}
+
+.sort-btn {
+  min-width: 0;
+
+  svg:first-child {
+    flex: none;
+    color: var(--text-subtle);
+  }
+}
+
+.sort-btn-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.save-btn.is-saved {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+// Phones and tablets: the Save button is icon-only, at the end of the summary row.
+.save-label {
+  @media (max-width: #{$desktop - 1px}) {
+    display: none;
+  }
+}
+
+.save-btn {
+  @media (max-width: #{$desktop - 1px}) {
+    width: 36px;
+    padding: 0;
+  }
+}
+
+.view-toggle {
+  display: inline-flex;
+  flex: none;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.view-btn {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 28px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--text-subtle);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--text);
+  }
+
+  &[aria-pressed='true'] {
+    background: var(--primary-soft);
+    color: var(--primary);
+  }
+}
+
+// Count, what's applied (each removable), and on desktop Save + layout.
+.results-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  min-height: 56px;
+  padding-block: var(--space-3);
+}
+
+.result-count {
+  color: var(--text-muted);
+  font-size: 14px;
+  white-space: nowrap;
+
+  strong {
+    color: var(--text);
+  }
+}
+
+.applied {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px var(--space-2);
+}
+
+.applied-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 8px 0 12px;
+  border: 1px solid color-mix(in srgb, var(--primary) 35%, var(--border));
+  border-radius: var(--radius-pill);
+  background: var(--primary-soft);
+  color: var(--primary);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 0.15s var(--ease);
+
+  svg {
+    opacity: 0.75;
+  }
+
+  &:hover {
+    border-color: var(--primary);
+
+    svg {
+      opacity: 1;
+    }
+  }
+}
+
+.clear-chips {
+  margin-left: var(--space-1);
+  font-size: 13.5px;
+}
+
+.summary-tools {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+// The layout toggle lives in the compact row on smaller screens.
+.summary-view {
+  display: none;
+
+  @media (min-width: $desktop) {
+    display: contents;
+  }
+}
+
+.location-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+
+  max-width: 100%;
+
+  svg {
+    flex: none;
+    color: var(--primary);
+  }
+
+  .location-label {
+    min-width: 0;
+    max-width: 30ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .change {
+    color: var(--primary);
+    font-weight: 600;
+  }
+
+  &:hover {
+    border-color: var(--primary);
+  }
+}
+
+// A thin bar while new results load; the old ones stay put underneath, dimmed.
+.refresh-bar {
+  position: relative;
+  height: 2px;
+  margin: -2px 0 0;
+  overflow: hidden;
+  border-radius: 2px;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    width: 30%;
+    background: var(--primary);
+    animation: refresh-slide 0.9s var(--ease) infinite;
+  }
+}
+
+@keyframes refresh-slide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(340%);
+  }
+}
+
+.results-body {
+  transition: opacity 0.2s var(--ease);
+
+  &.is-refreshing {
+    opacity: 0.55;
+    pointer-events: none;
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 272px), 1fr));
+  gap: var(--space-6);
+
+  > li {
+    min-width: 0;
+  }
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+// Column labels for the wide list layout (mirrors the row's own grid).
+.list-head {
+  display: none;
+  grid-template-columns: 200px minmax(0, 1.2fr) minmax(0, 1.2fr) minmax(0, 0.9fr) 190px;
+  gap: var(--space-5);
+  margin-bottom: var(--space-2);
+  padding: 0 calc(var(--space-3) + 1px);
+  color: var(--text-subtle);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+
+  span:last-child {
+    text-align: right;
+  }
+}
+
+@container (min-width: 1180px) {
+  .list-head {
+    display: grid;
+  }
+}
+
+.list .skeleton-card {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+
+  .skeleton-media {
+    aspect-ratio: 4 / 3;
+  }
+}
+
+.sentinel {
+  height: 1px;
+}
+
+.more-skeletons {
+  margin-top: var(--space-5);
+}
+
+.end {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-7);
+  font-size: 14px;
+}
+
+.skeleton-card {
+  overflow: hidden;
+}
+
+.skeleton-media {
+  aspect-ratio: 4 / 3;
+  border-radius: 0;
+}
+
+.skeleton-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: var(--space-4);
+}
+
+.more {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-8) var(--space-4);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+  color: var(--text-subtle);
+  text-align: center;
+
+  h2 {
+    color: var(--text);
+    font-size: 20px;
+  }
+
+  p {
+    max-width: 380px;
+  }
+
+  .btn {
+    margin-top: var(--space-2);
+  }
+}
+
+// Small phones: keep Filters · Sort · layout on one line without truncating the sort name.
+@media (max-width: 400px) {
+  .compact-tools {
+    gap: 6px;
+
+    .btn {
+      gap: 6px;
+      padding: 0 10px;
+    }
+  }
+
+  .sort-btn svg:first-child {
+    display: none;
+  }
+
+  .view-btn {
+    width: 30px;
+  }
+}

@@ -4,3 +4,16 @@ node_modules/
 .DS_Store
 *.log
 *.bak
+
+# Build output & caches
+dist/
+.angular/
+coverage/
+out-tsc/
+*.tsbuildinfo
+
+# Local SQLite database (re-seeded from data/vehicles.json on first start)
+apps/api/data/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm

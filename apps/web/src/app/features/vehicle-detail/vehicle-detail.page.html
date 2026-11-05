@@ -1,0 +1,262 @@
+<div class="container page">
+  <button type="button" class="btn btn--ghost btn--sm back" (click)="back()">
+    <svg appIcon="arrow-left" [size]="16"></svg>
+    Back to auctions
+  </button>
+
+  @switch (state()) {
+    @case ('loading') {
+      <div class="columns" aria-busy="true">
+        <div class="gallery-area"><div class="skeleton" style="aspect-ratio: 4 / 3; border-radius: 16px"></div></div>
+        <div class="panel-area"><div class="skeleton" style="height: 420px; border-radius: 16px"></div></div>
+      </div>
+    }
+    @case ('not_found') {
+      <div class="empty">
+        <svg appIcon="car-front" [size]="40" [strokeWidth]="1.5"></svg>
+        <h1>This vehicle isn't in the auction</h1>
+        <p class="muted">It may have been removed, or the link is incorrect.</p>
+        <a class="btn btn--primary" routerLink="/">Browse auctions</a>
+      </div>
+    }
+    @case ('error') {
+      <div class="empty">
+        <h1>We couldn't load this vehicle</h1>
+        <p class="muted">Check that the API is running, then try again.</p>
+        <button type="button" class="btn btn--primary" (click)="reload()">Try again</button>
+      </div>
+    }
+    @default {
+      @if (vehicle(); as v) {
+        <header class="head">
+          <div class="head-main">
+            <p class="eyebrow">Lot {{ v.lot }} · {{ v.bodyStyle | humanize }}</p>
+            <h1>{{ name() }} <span class="trim">{{ v.trim }}</span></h1>
+            <ul class="head-meta">
+              <li><svg appIcon="gauge" [size]="16"></svg>{{ v.odometerKm | km }}</li>
+              <li>
+                <svg appIcon="map-pin" [size]="16"></svg>
+                <a class="map-link" [href]="mapUrl()" target="_blank" rel="noopener" title="Open in Google Maps">
+                  {{ v.city }}, {{ v.province | province }}
+                  <svg appIcon="external-link" [size]="13"></svg>
+                  <span class="sr-only">(opens Google Maps)</span>
+                </a>
+                @if (distance(); as distance) {
+                  <span class="distance">· {{ distance }}</span>
+                }
+              </li>
+              <li><svg appIcon="store" [size]="16"></svg>{{ v.sellingDealership }}</li>
+            </ul>
+            <div class="head-tags">
+              <app-condition-grade [grade]="v.conditionGrade" />
+              <app-title-badge [status]="v.titleStatus" [showClean]="true" />
+              <app-my-status-badge [status]="v.myStatus" />
+            </div>
+          </div>
+          <app-watch-button [vehicleId]="v.id" variant="labelled" />
+        </header>
+
+        <div class="columns">
+          <div class="gallery-area">
+            <app-gallery [images]="v.images" [alt]="name() + ' ' + v.trim" [paint]="v.exteriorColor" />
+          </div>
+
+          <aside class="panel-area" #bidPanelAnchor (appInView)="panelInView.set($event)">
+            <app-bid-panel [vehicle]="v" [priceFlash]="priceFlash()" (updated)="onBidPlaced($event)" (stale)="reload()" />
+          </aside>
+
+          <div class="facts-area">
+            @if (value(); as value) {
+              <section class="card section value-section" aria-labelledby="value-title">
+                <div class="section-head">
+                  <h2 class="section-title" id="value-title">Market value</h2>
+                  <span class="value-asof">Estimated {{ today() }}</span>
+                </div>
+
+                <div class="value-figure">
+                  <p class="value-amount tabular">{{ value.estimate.value | money }}</p>
+                  <p class="value-range">
+                    Typical range
+                    <span class="tabular">{{ value.estimate.low | money }} – {{ value.estimate.high | money }}</span>
+                  </p>
+                </div>
+
+                <div class="gauge" aria-hidden="true">
+                  <div class="gauge-track">
+                    <span
+                      class="gauge-band"
+                      [style.left.%]="value.gauge.low"
+                      [style.width.%]="value.gauge.high - value.gauge.low"
+                    ></span>
+                    <span class="gauge-tick" [style.left.%]="value.gauge.value"></span>
+                    @if (value.buyNow !== null) {
+                      <span class="gauge-dot gauge-dot--buy" [style.left.%]="value.gauge.buyNow"></span>
+                    }
+                    <span class="gauge-dot gauge-dot--price" [style.left.%]="value.gauge.price"></span>
+                  </div>
+                  <ul class="gauge-legend">
+                    <li>
+                      <span class="key key--price"></span>{{ value.priceLabel }}
+                      <strong class="tabular">{{ value.price | money }}</strong>
+                    </li>
+                    @if (value.buyNow !== null) {
+                      <li>
+                        <span class="key key--buy"></span>Buy now <strong class="tabular">{{ value.buyNow | money }}</strong>
+                      </li>
+                    }
+                    <li><span class="key key--band"></span>Estimated range</li>
+                  </ul>
+                </div>
+
+                <p class="value-verdict">{{ value.verdict }}</p>
+                <p class="value-note">
+                  <svg appIcon="info" [size]="15"></svg>
+                  A prototype estimate from the year, mileage, condition grade and title, not a valuation guide.
+                </p>
+              </section>
+            }
+
+            <section class="card section specs-section" aria-labelledby="specs-title">
+              <h2 class="section-title" id="specs-title">Vehicle details</h2>
+              <dl class="specs">
+                <div class="spec"><dt>Year</dt><dd>{{ v.year }}</dd></div>
+                <div class="spec"><dt>Odometer</dt><dd class="tabular">{{ v.odometerKm | km }}</dd></div>
+                <div class="spec"><dt>Engine</dt><dd>{{ v.engine }}</dd></div>
+                <div class="spec"><dt>Transmission</dt><dd>{{ v.transmission | humanize }}</dd></div>
+                <div class="spec"><dt>Drivetrain</dt><dd>{{ v.drivetrain }}</dd></div>
+                <div class="spec"><dt>Fuel type</dt><dd>{{ v.fuelType | humanize }}</dd></div>
+                <div class="spec">
+                  <dt>Exterior</dt>
+                  <dd>
+                    @if (paint(); as paint) {
+                      <span class="swatch" [style.background]="paint" aria-hidden="true"></span>
+                    }
+                    {{ v.exteriorColor }}
+                  </dd>
+                </div>
+                <div class="spec"><dt>Interior</dt><dd>{{ v.interiorColor }}</dd></div>
+              </dl>
+              <div class="vin-row">
+                <span class="eyebrow">VIN</span>
+                <code class="vin">{{ v.vin }}</code>
+                <button type="button" class="btn btn--ghost btn--sm" (click)="copyVin(v.vin)">
+                  <svg appIcon="copy" [size]="15"></svg>
+                  Copy
+                </button>
+              </div>
+            </section>
+
+            <section class="card section" aria-labelledby="sale-title">
+              <h2 class="section-title" id="sale-title">Sale information</h2>
+              <dl class="sale-info">
+                <div>
+                  <dt>Location</dt>
+                  <dd>
+                    {{ v.city }}, {{ v.province }}
+                    @if (distance(); as distance) {
+                      <span class="distance">{{ distance }}</span>
+                    }
+                    <a class="map-link map-link--block" [href]="mapUrl()" target="_blank" rel="noopener">
+                      <svg appIcon="map" [size]="15"></svg>
+                      Open in Google Maps
+                      <span class="sr-only">(new tab)</span>
+                    </a>
+                  </dd>
+                </div>
+                <div>
+                  <dt>Seller</dt>
+                  <dd>
+                    {{ v.sellingDealership }}
+                    <span class="muted">Vehicle located on site</span>
+                  </dd>
+                </div>
+                @if (listed(); as listed) {
+                  <div>
+                    <dt>Listed</dt>
+                    <dd>{{ listed.at }} <span class="muted">{{ listed.ago }}</span></dd>
+                  </div>
+                }
+                <div>
+                  <dt>{{ v.auction.status === 'open' ? 'Closes' : 'Closed' }}</dt>
+                  <dd>
+                    {{ closesAt() }}
+                    @if (v.auction.extended) {
+                      <span class="muted">Extended by late bids</span>
+                    }
+                  </dd>
+                </div>
+                <div>
+                  <dt>Lot</dt>
+                  <dd class="tabular">{{ v.lot }}</dd>
+                </div>
+              </dl>
+            </section>
+          </div>
+
+          <div class="content-area">
+            <section class="card section condition" aria-labelledby="condition-title">
+              <div class="section-head">
+                <h2 class="section-title" id="condition-title">Condition report</h2>
+                <app-title-badge [status]="v.titleStatus" [showClean]="true" />
+              </div>
+              <app-condition-grade [grade]="v.conditionGrade" size="lg" />
+              <p class="report">{{ v.conditionReport }}</p>
+
+              <h3 class="subhead">
+                Damage &amp; disclosures
+                <span class="chip">{{ v.damageNotes.length }}</span>
+              </h3>
+              @if (v.damageNotes.length) {
+                <ul class="damage">
+                  @for (note of v.damageNotes; track note.text) {
+                    <li [attr.data-severity]="note.severity">
+                      <span class="damage-icon" aria-hidden="true">
+                        @switch (note.severity) {
+                          @case ('major') {
+                            <svg appIcon="triangle-exclamation-point" [size]="16" [strokeWidth]="2.2"></svg>
+                          }
+                          @case ('mechanical') {
+                            <svg appIcon="wrench" [size]="16" [strokeWidth]="2.2"></svg>
+                          }
+                          @default {
+                            <svg appIcon="sparkles" [size]="16" [strokeWidth]="2.2"></svg>
+                          }
+                        }
+                      </span>
+                      <span class="damage-text">{{ note.text }}</span>
+                      <span class="damage-severity">{{ note.severity | humanize }}</span>
+                    </li>
+                  }
+                </ul>
+              } @else {
+                <p class="no-damage">
+                  <svg appIcon="circle-check" [size]="18" [strokeWidth]="2.2"></svg>
+                  No damage reported by the seller.
+                </p>
+              }
+            </section>
+
+            <section class="card section history-section" aria-labelledby="history-title">
+              <div class="section-head">
+                <h2 class="section-title" id="history-title">Bid history</h2>
+                <span class="muted tabular">{{ v.auction.bidCount }} {{ v.auction.bidCount === 1 ? 'bid' : 'bids' }}</span>
+              </div>
+              <app-bid-history [bids]="v.recentBids" />
+            </section>
+          </div>
+        </div>
+
+        @if (v.auction.status === 'open' && !panelInView()) {
+          <div class="bid-bar" role="region" aria-label="Quick bid">
+            <div class="bar-price">
+              <span class="eyebrow">{{ v.auction.currentBid === null ? 'Starting bid' : 'Current bid' }}</span>
+              <span class="tabular">{{ v.auction.currentBid ?? v.auction.startingBid | money }}</span>
+            </div>
+            <app-lot-status [auction]="v.auction" />
+            <button type="button" class="btn btn--cta" (click)="scrollToBid()">Bid</button>
+          </div>
+        }
+      }
+    }
+  }
+</div>

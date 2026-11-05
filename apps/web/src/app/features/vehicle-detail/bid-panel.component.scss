@@ -1,0 +1,211 @@
+:host {
+  display: block;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-md);
+}
+
+.status-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.closes {
+  font-size: 13px;
+}
+
+// --- My status banners -------------------------------------------------------
+
+.banner {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--surface-muted);
+  font-size: 14px;
+
+  svg {
+    flex: none;
+    margin-top: 1px;
+  }
+
+  strong {
+    display: block;
+    color: var(--text);
+  }
+
+  span {
+    color: var(--text-muted);
+  }
+}
+
+.banner--success {
+  background: var(--success-soft);
+
+  svg {
+    color: var(--success);
+  }
+}
+
+.banner--danger {
+  background: var(--danger-soft);
+
+  svg {
+    color: var(--danger);
+  }
+}
+
+// --- Price -----------------------------------------------------------------
+
+.price-block {
+  margin: 0 calc(var(--space-3) * -1);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+}
+
+.price {
+  margin-top: 2px;
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.price-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+// --- Bid form --------------------------------------------------------------
+
+.bid-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+.quick {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+}
+
+.quick-btn {
+  height: 44px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  font-size: 14.5px;
+  font-weight: 600;
+  transition: border-color 0.15s var(--ease), background-color 0.15s var(--ease), color 0.15s var(--ease);
+
+  &:hover {
+    background: var(--surface-muted);
+  }
+
+  // Selected amount picks up the action colour, tying it to the button below.
+  &[aria-pressed='true'] {
+    border-color: var(--cta);
+    background: var(--cta-soft);
+    color: var(--cta-text);
+  }
+}
+
+.amount-field {
+  position: relative;
+  display: block;
+
+  .prefix {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    transform: translateY(-50%);
+    color: var(--text-subtle);
+    font-weight: 600;
+  }
+
+  .input {
+    padding-left: 28px;
+    font-weight: 600;
+
+    &::placeholder {
+      font-weight: 400;
+    }
+  }
+}
+
+.hint,
+.field-error {
+  margin-top: calc(var(--space-1) * -1);
+  font-size: 13px;
+}
+
+.field-error {
+  color: var(--danger);
+  font-weight: 500;
+}
+
+.leading-note,
+.ended-note {
+  font-size: 14px;
+}
+
+.server-message {
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+  font-size: 14px;
+
+  &[data-tone='danger'] {
+    background: var(--danger-soft);
+    color: var(--danger);
+    font-weight: 500;
+  }
+}
+
+// --- Buy Now ---------------------------------------------------------------
+
+.buy-now {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px dashed color-mix(in srgb, var(--cta) 45%, var(--border));
+  border-radius: var(--radius-md);
+}
+
+.buy-now-price {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.trust {
+  display: flex;
+  gap: var(--space-2);
+  font-size: 12.5px;
+  line-height: 1.45;
+
+  svg {
+    flex: none;
+    margin-top: 2px;
+    color: var(--success);
+  }
+}

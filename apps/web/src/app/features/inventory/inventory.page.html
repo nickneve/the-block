@@ -1,0 +1,371 @@
+@let q = query();
+<section class="intro container">
+  <h1>Browse auctions</h1>
+  <p class="lede">
+    @if (totals(); as totals) {
+      <strong class="tabular">{{ totals.open }}</strong> vehicles open for bidding ·
+      <strong class="tabular">{{ totals.closingSoon }}</strong> closing in the next 24 hours
+    } @else {
+      Live online auctions from dealerships across Canada
+    }
+  </p>
+
+  <div class="search-row">
+    <div class="search" role="search">
+      <svg appIcon="search" [size]="20" [strokeWidth]="2" class="search-icon"></svg>
+      <label for="inventory-search" class="sr-only">Search vehicles</label>
+      <input
+        id="inventory-search"
+        class="input search-input"
+        type="search"
+        autocomplete="off"
+        placeholder="Search make, model, VIN, dealer…"
+        [value]="searchInput()"
+        (input)="onSearchInput($event)"
+      />
+      @if (searchInput()) {
+        <button type="button" class="icon-btn search-clear" aria-label="Clear search" (click)="clearSearch()">
+          <svg appIcon="x" [size]="18"></svg>
+        </button>
+      }
+    </div>
+
+    <button
+      type="button"
+      class="saved-btn"
+      [cdkMenuTriggerFor]="savedMenu"
+      [cdkMenuPosition]="menuBelowEnd"
+      [attr.aria-label]="'Saved searches' + (saved.newCount() > 0 ? ', ' + saved.newCount() + ' new matches' : '')"
+    >
+      <svg appIcon="bookmark" [size]="18" [strokeWidth]="2.1"></svg>
+      <span class="saved-btn-label">Saved searches</span>
+      @if (saved.newCount() > 0) {
+        <span class="saved-btn-new tabular">{{ saved.newCount() }} new</span>
+      }
+      <svg appIcon="chevron-down" [size]="15" class="saved-btn-caret"></svg>
+    </button>
+  </div>
+</section>
+
+<div class="layout container">
+  <!-- Desktop: sticky sidebar. Phones and tablets: the same panel as a full-height sheet. -->
+  <div class="filters-scrim" [class.open]="filtersOpen()" (click)="filtersOpen.set(false)" aria-hidden="true"></div>
+  <aside
+    class="filters"
+    [class.open]="filtersOpen()"
+    [cdkTrapFocus]="filtersOpen()"
+    [cdkTrapFocusAutoCapture]="true"
+    aria-label="Filters"
+  >
+    <div class="filters-head">
+      <h2 class="section-title">Filters</h2>
+      @if (activeFilters() > 0) {
+        <!-- On desktop the chips above the results have their own Clear all. -->
+        <button type="button" class="link-btn sheet-clear" (click)="clearAllFilters()">Clear all ({{ activeFilters() }})</button>
+      }
+      <button type="button" class="icon-btn close-sheet" aria-label="Close filters" (click)="filtersOpen.set(false)">
+        <svg appIcon="x" [size]="20"></svg>
+      </button>
+    </div>
+    <div class="filters-scroll">
+      <app-filter-panel
+        [facets]="facets()"
+        [query]="q"
+        [statusCounts]="statusCounts()"
+        (queryChange)="applyFilters($event)"
+      />
+    </div>
+    <div class="sheet-foot">
+      <button type="button" class="btn btn--primary btn--block" (click)="filtersOpen.set(false)">
+        Show {{ total() }} {{ total() === 1 ? 'vehicle' : 'vehicles' }}
+      </button>
+    </div>
+  </aside>
+
+  <section class="results" [attr.aria-busy]="state() === 'loading' || state() === 'refreshing'">
+    <div #resultsTop class="results-head">
+      <!-- Desktop: one row of sort tabs; the less common sorts sit under "More". -->
+      <div class="sort-tabs" role="group" aria-label="Sort">
+        @for (option of quickSorts; track option.id) {
+          <button
+            type="button"
+            class="tab"
+            [attr.aria-pressed]="activeQuick() === option.id"
+            (click)="selectQuickSort(option.id)"
+          >
+            @if (option.id === 'distance') {
+              <svg appIcon="navigation" [size]="13" [strokeWidth]="2.4"></svg>
+            }
+            {{ option.label }}
+          </button>
+        }
+        <button
+          type="button"
+          class="tab tab--more"
+          [attr.aria-pressed]="moreSortActive()"
+          [cdkMenuTriggerFor]="sortMenu"
+          [cdkMenuTriggerData]="{ $implicit: moreChoices }"
+          [cdkMenuPosition]="menuBelowEnd"
+        >
+          {{ moreSortActive() ? currentSortLabel() : 'More' }}
+          <svg appIcon="chevron-down" [size]="15"></svg>
+        </button>
+      </div>
+
+      <!-- Phones and tablets: Filters · Sort · Save · layout, in one row. -->
+      <div class="compact-tools">
+        <button type="button" class="btn btn--secondary btn--sm" (click)="filtersOpen.set(true)">
+          <svg appIcon="sliders-horizontal" [size]="16"></svg>
+          Filters
+          @if (activeFilters() > 0) {
+            <span class="count-badge tabular">{{ activeFilters() }}</span>
+          }
+        </button>
+        <button
+          type="button"
+          class="btn btn--secondary btn--sm sort-btn"
+          [cdkMenuTriggerFor]="sortMenu"
+          [cdkMenuTriggerData]="{ $implicit: allChoices }"
+          [cdkMenuPosition]="menuBelowStart"
+          [attr.aria-label]="'Sort: ' + currentSortLabel()"
+        >
+          <svg appIcon="arrow-up-down" [size]="15"></svg>
+          <span class="sort-btn-label">{{ currentSortLabel() }}</span>
+          <svg appIcon="chevron-down" [size]="15"></svg>
+        </button>
+        <span class="spacer"></span>
+        <ng-container *ngTemplateOutlet="viewToggle" />
+      </div>
+    </div>
+
+    <div class="results-summary">
+      <p class="result-count" aria-live="polite">
+        @if (state() === 'loading') {
+          Loading vehicles…
+        } @else if (state() !== 'error') {
+          <strong class="tabular">{{ total() }}</strong> {{ total() === 1 ? 'vehicle' : 'vehicles' }}
+        }
+      </p>
+
+      @if (q.sort === 'distance') {
+        @if (location(); as location) {
+          <button type="button" class="location-chip" (click)="openLocation()">
+            <svg appIcon="map-pin" [size]="14" [strokeWidth]="2.2"></svg>
+            <span class="location-label">From {{ location.label }}</span>
+            <span class="change">Change</span>
+          </button>
+        } @else {
+          <button type="button" class="link-btn" (click)="openLocation()">Set your location to sort by distance</button>
+        }
+      }
+
+      @if (applied().length > 0) {
+        <ul class="applied" aria-label="Applied filters">
+          @for (chip of applied(); track chip.id) {
+            <li>
+              <button
+                type="button"
+                class="applied-chip"
+                [attr.aria-label]="'Remove filter: ' + chip.label"
+                (click)="removeFilter(chip)"
+              >
+                {{ chip.label }}
+                <svg appIcon="x" [size]="14" [strokeWidth]="2.4"></svg>
+              </button>
+            </li>
+          }
+          @if (applied().length > 1) {
+            <li><button type="button" class="link-btn clear-chips" (click)="resetFilters()">Clear all</button></li>
+          }
+        </ul>
+      }
+
+      <div class="summary-tools">
+        @if (canSave()) {
+          <button
+            type="button"
+            class="btn btn--secondary btn--sm save-btn"
+            [class.is-saved]="savedForQuery()"
+            [attr.aria-pressed]="!!savedForQuery()"
+            [attr.aria-label]="savedForQuery() ? 'Saved search, select to remove' : 'Save search'"
+            [attr.title]="savedForQuery() ? 'Saved. Select to remove it.' : 'Save this search to come back to it'"
+            (click)="toggleSave()"
+          >
+            <svg [appIcon]="savedForQuery() ? 'bookmark-check' : 'bookmark-plus'" [size]="16"></svg>
+            <span class="save-label">{{ savedForQuery() ? 'Saved' : 'Save search' }}</span>
+          </button>
+        }
+        <span class="summary-view"><ng-container *ngTemplateOutlet="viewToggle" /></span>
+      </div>
+    </div>
+
+    @if (state() === 'refreshing') {
+      <div class="refresh-bar" aria-hidden="true"></div>
+    }
+
+    @switch (state()) {
+      @case ('loading') {
+        <div [class]="view()" aria-hidden="true">
+          @for (placeholder of [1, 2, 3, 4, 5, 6]; track placeholder) {
+            <div class="card skeleton-card">
+              <div class="skeleton skeleton-media"></div>
+              <div class="skeleton-body">
+                <div class="skeleton" style="height: 20px; width: 70%"></div>
+                <div class="skeleton" style="height: 14px; width: 45%"></div>
+                <div class="skeleton" style="height: 14px; width: 60%"></div>
+                <div class="skeleton" style="height: 28px; width: 40%; margin-top: 12px"></div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+      @case ('error') {
+        <div class="empty">
+          <svg appIcon="rotate-ccw" [size]="32" [strokeWidth]="1.6"></svg>
+          <h2>We couldn't load vehicles</h2>
+          <p class="muted">The auction server didn't respond. Make sure the API is running, then try again.</p>
+          <button type="button" class="btn btn--primary" (click)="retry()">Try again</button>
+        </div>
+      }
+      @default {
+        <div class="results-body" [class.is-refreshing]="state() === 'refreshing'">
+          @if (items().length === 0) {
+            <div class="empty">
+              <svg appIcon="car-front" [size]="36" [strokeWidth]="1.6"></svg>
+              <h2>No vehicles match</h2>
+              <p class="muted">Try removing a filter above, or searching for a different make.</p>
+              <button type="button" class="btn btn--primary" (click)="resetFilters()">Clear search &amp; filters</button>
+            </div>
+          } @else {
+            @if (view() === 'list') {
+              <div class="list-head" aria-hidden="true">
+                <span></span><span>Vehicle</span><span>Details</span><span>Location &amp; timing</span><span>Price</span>
+              </div>
+              <ul class="list">
+                @for (vehicle of items(); track vehicle.id) {
+                  <li><app-vehicle-row [vehicle]="vehicle" /></li>
+                }
+              </ul>
+            } @else {
+              <ul class="grid">
+                @for (vehicle of items(); track vehicle.id) {
+                  <li><app-vehicle-card [vehicle]="vehicle" /></li>
+                }
+              </ul>
+            }
+
+            @if (hasMore()) {
+              <div #sentinel class="sentinel" [inViewMargin]="prefetchMargin" (appInView)="onSentinel($event)"></div>
+              @if (loadMoreFailed()) {
+                <div class="more">
+                  <p class="muted">We couldn't load more vehicles.</p>
+                  <button type="button" class="btn btn--secondary" (click)="retryLoadMore()">Try again</button>
+                </div>
+              } @else if (loadingMore()) {
+                <div [class]="view() + ' more-skeletons'" aria-hidden="true">
+                  @for (placeholder of [1, 2, 3]; track placeholder) {
+                    <div class="card skeleton-card">
+                      <div class="skeleton skeleton-media"></div>
+                      <div class="skeleton-body">
+                        <div class="skeleton" style="height: 20px; width: 70%"></div>
+                        <div class="skeleton" style="height: 14px; width: 45%"></div>
+                      </div>
+                    </div>
+                  }
+                </div>
+                <p class="sr-only" role="status">Loading more vehicles…</p>
+              }
+            } @else if (items().length > pageSize) {
+              <div class="end">
+                <p class="muted">That's all {{ total() }} vehicles.</p>
+                <button type="button" class="btn btn--ghost btn--sm" (click)="scrollToTop()">
+                  <svg appIcon="arrow-up" [size]="16"></svg>
+                  Back to top
+                </button>
+              </div>
+            }
+          }
+        </div>
+      }
+    }
+  </section>
+</div>
+
+<ng-template #viewToggle>
+  <div class="view-toggle" role="group" aria-label="Layout">
+    <button
+      type="button"
+      class="view-btn"
+      aria-label="Grid view"
+      title="Grid view"
+      [attr.aria-pressed]="view() === 'grid'"
+      (click)="setView('grid')"
+    >
+      <svg appIcon="layout-grid" [size]="17"></svg>
+    </button>
+    <button
+      type="button"
+      class="view-btn"
+      aria-label="List view"
+      title="List view"
+      [attr.aria-pressed]="view() === 'list'"
+      (click)="setView('list')"
+    >
+      <svg appIcon="list" [size]="17"></svg>
+    </button>
+  </div>
+</ng-template>
+
+<ng-template #sortMenu let-choices>
+  <div class="menu sort-menu" cdkMenu aria-label="Sort by">
+    @for (choice of choices; track choice.key) {
+      @if (choice.dividerBefore) {
+        <hr class="menu-divider" />
+      }
+      <button
+        type="button"
+        cdkMenuItemRadio
+        class="menu-item"
+        [cdkMenuItemChecked]="isChoiceActive(choice)"
+        (cdkMenuItemTriggered)="chooseSort(choice)"
+      >
+        {{ choice.label }}
+        @if (isChoiceActive(choice)) {
+          <svg appIcon="check" [size]="16" [strokeWidth]="2.4" class="menu-check"></svg>
+        }
+      </button>
+    }
+  </div>
+</ng-template>
+
+<ng-template #savedMenu>
+  <div class="menu saved-menu" cdkMenu aria-label="Saved searches">
+    <span class="menu-label">Saved searches</span>
+    @for (search of saved.items(); track search.id) {
+      <button
+        type="button"
+        cdkMenuItem
+        class="menu-item saved-item"
+        [class.is-current]="isActiveSaved(search)"
+        (cdkMenuItemTriggered)="applySaved(search)"
+      >
+        <span class="saved-item-name">{{ search.name }}</span>
+        <span class="saved-item-counts">
+          @if (search.newCount > 0) {
+            <span class="menu-badge">{{ search.newCount }} new</span>
+          }
+          <span class="tabular" [attr.aria-label]="search.matchCount + ' matches'">{{ search.matchCount }}</span>
+        </span>
+      </button>
+    } @empty {
+      <p class="saved-empty">
+        Nothing saved yet. Filter the results, then choose <strong>Save search</strong> to come back to them here.
+      </p>
+    }
+    <hr class="menu-divider" />
+    <a cdkMenuItem class="menu-item" routerLink="/saved-searches">
+      <svg appIcon="pencil" [size]="16"></svg>
+      Manage saved searches
+    </a>
+  </div>
+</ng-template>

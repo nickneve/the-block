@@ -1,0 +1,24 @@
+{
+  "name": "the-block",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Buyer-side vehicle auction prototype — Angular + NestJS + SQLite",
+  "workspaces": [
+    "apps/api",
+    "apps/web"
+  ],
+  "engines": {
+    "node": "^20.19.0 || ^22.12.0 || >=24.0.0"
+  },
+  "scripts": {
+    "dev": "concurrently --kill-others-on-fail --names api,web --prefix-colors blue,magenta \"npm run dev -w @the-block/api\" \"npm run dev -w @the-block/web\"",
+    "build": "npm run build -w @the-block/web && npm run build -w @the-block/api",
+    "start": "npm run build && npm run start -w @the-block/api",
+    "test": "npm test -w @the-block/api && npm test -w @the-block/web",
+    "db:reset": "npm run db:reset -w @the-block/api",
+    "generate:data": "node scripts/generate_vehicles.mjs"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

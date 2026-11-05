@@ -1,0 +1,91 @@
+<div class="container page">
+  <header class="intro">
+    <p class="eyebrow">Your activity</p>
+    <h1>My bids</h1>
+    <p class="lede muted">
+      @if (account(); as signedIn) {
+        Signed in as <strong>{{ signedIn.name }}</strong>. Other bidders see you as
+        <strong>{{ bidder.handle() ?? '…' }}</strong>.
+      } @else {
+        You're bidding as a guest. Other bidders see you as <strong>{{ bidder.handle() ?? '…' }}</strong>.
+      }
+      @if (store.outbid().length > 0) {
+        <span class="attention">
+          You've been outbid on {{ store.outbid().length }} {{ store.outbid().length === 1 ? 'vehicle' : 'vehicles' }}.
+        </span>
+      }
+    </p>
+  </header>
+
+  <div class="tabs" role="group" aria-label="Show">
+    @for (option of tabs(); track option.value) {
+      <button type="button" class="pill" [attr.aria-pressed]="tab() === option.value" (click)="selectTab(option.value)">
+        {{ option.label }} <span class="count">{{ option.count }}</span>
+      </button>
+    }
+  </div>
+
+  @if (!store.loaded() || (tab() === 'watchlist' && !watchlistLoaded())) {
+    <div class="list">
+      @for (placeholder of [1, 2, 3]; track placeholder) {
+        <div class="skeleton" style="height: 112px; border-radius: 16px"></div>
+      }
+    </div>
+  } @else if (rows().length === 0) {
+    <div class="empty">
+      @if (tab() === 'watchlist') {
+        <svg appIcon="star" [size]="34" [strokeWidth]="1.6"></svg>
+        <h2>Nothing on your watchlist</h2>
+        <p class="muted">Star vehicles while you browse to keep an eye on them here.</p>
+      } @else {
+        <svg appIcon="gavel" [size]="34" [strokeWidth]="1.6"></svg>
+        <h2>{{ tab() === 'active' ? 'No active bids' : 'No finished auctions yet' }}</h2>
+        <p class="muted">Bids you place show up here, with a heads-up the moment you're outbid.</p>
+      }
+      <a class="btn btn--primary" routerLink="/">Browse auctions</a>
+    </div>
+  } @else {
+    <ul class="list">
+      @for (item of rows(); track item.id) {
+        <li class="card row" [class.is-outbid]="item.myStatus === 'outbid'">
+          <a class="thumb" [routerLink]="['/vehicles', item.id]" tabindex="-1" aria-hidden="true">
+            <app-vehicle-image [src]="item.thumbnail" [alt]="''" [paint]="item.exteriorColor" />
+          </a>
+
+          <div class="info">
+            <a class="title" [routerLink]="['/vehicles', item.id]">{{ item.year }} {{ item.make }} {{ item.model }}</a>
+            <p class="subtitle muted">{{ item.trim }} · Lot {{ item.lot }}</p>
+            <div class="badges">
+              <app-lot-status [auction]="item.auction" />
+              <app-my-status-badge [status]="item.myStatus" />
+            </div>
+          </div>
+
+          <dl class="numbers">
+            <div>
+              <dt>{{ item.auction.currentBid === null ? 'Starting' : item.auction.status === 'open' ? 'Current' : 'Final' }}</dt>
+              <dd class="tabular">{{ price(item) | money }}</dd>
+            </div>
+            @if (item.myMaxBid !== null) {
+              <div>
+                <dt>Your max</dt>
+                <dd class="tabular">{{ item.myMaxBid | money }}</dd>
+              </div>
+            }
+          </dl>
+
+          <div class="actions">
+            @if (item.myStatus === 'outbid') {
+              <a class="btn btn--cta btn--sm" [routerLink]="['/vehicles', item.id]">Bid again</a>
+            } @else {
+              <a class="btn btn--secondary btn--sm" [routerLink]="['/vehicles', item.id]">View</a>
+            }
+            @if (tab() === 'watchlist') {
+              <app-watch-button [vehicleId]="item.id" />
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>

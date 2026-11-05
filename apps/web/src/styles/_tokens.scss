@@ -1,0 +1,133 @@
+// ---------------------------------------------------------------------------
+// The Block design tokens
+//
+// One neutral canvas, one brand colour, one action colour:
+//   • Lane Blue  (--primary) — navigation, selection, focus. "Where am I / what's selected".
+//   • Signal Orange (--cta)  — ONLY bid, Buy Now and confirm. "This is where you act".
+//   • Semantic colours appear only in chips and banners, always with an icon or label.
+// ---------------------------------------------------------------------------
+
+@mixin light-theme {
+  color-scheme: light;
+
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-muted: #eef1f5;
+  --surface-sunken: #e7ebf1;
+  --border: #dde2ea;
+  --border-strong: #c9d0db;
+
+  --text: #0e1726;
+  --text-muted: #5a6578;
+  --text-subtle: #7a8597;
+
+  --primary: #2251e5;
+  --primary-hover: #1b43c4;
+  --primary-soft: #e6ecfd;
+  --primary-contrast: #ffffff;
+
+  --cta: #c2410c;
+  --cta-hover: #a8380a;
+  --cta-soft: #fff1e8;
+  --cta-text: #c2410c;
+  --cta-contrast: #ffffff;
+
+  --success: #15803d;
+  --success-soft: #dcfce7;
+  --warning: #b45309;
+  --warning-soft: #fef3c7;
+  --danger: #b91c1c;
+  --danger-soft: #fee2e2;
+
+  --star: #e09b0b;
+  --overlay-chip: rgba(14, 23, 38, 0.78);
+  --scrim: rgba(14, 23, 38, 0.45);
+
+  --shadow-sm: 0 1px 2px rgba(14, 23, 38, 0.06);
+  --shadow-md: 0 4px 16px -4px rgba(14, 23, 38, 0.12), 0 2px 4px rgba(14, 23, 38, 0.04);
+  --shadow-lg: 0 18px 48px -12px rgba(14, 23, 38, 0.25);
+  --shadow-cta: 0 6px 16px -6px rgba(194, 65, 12, 0.55);
+}
+
+@mixin dark-theme {
+  color-scheme: dark;
+
+  --bg: #0b1120;
+  --surface: #131b2e;
+  --surface-muted: #1b2540;
+  --surface-sunken: #0f1628;
+  --border: #27324d;
+  --border-strong: #35415f;
+
+  --text: #e7ecf5;
+  --text-muted: #98a3b8;
+  --text-subtle: #7b86a0;
+
+  --primary: #7c9cff;
+  --primary-hover: #99b2ff;
+  --primary-soft: rgba(124, 156, 255, 0.14);
+  --primary-contrast: #0b1120;
+
+  --cta: #ff8a3d;
+  --cta-hover: #ff9f5f;
+  --cta-soft: rgba(255, 138, 61, 0.12);
+  --cta-text: #ff9a55;
+  --cta-contrast: #1b0f06;
+
+  --success: #34d399;
+  --success-soft: rgba(52, 211, 153, 0.14);
+  --warning: #fbbf24;
+  --warning-soft: rgba(251, 191, 36, 0.14);
+  --danger: #f87171;
+  --danger-soft: rgba(248, 113, 113, 0.14);
+
+  --star: #fbbf24;
+  --overlay-chip: rgba(11, 17, 32, 0.82);
+  --scrim: rgba(3, 6, 14, 0.65);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 6px 20px -6px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 24px 60px -12px rgba(0, 0, 0, 0.6);
+  --shadow-cta: 0 6px 18px -6px rgba(255, 138, 61, 0.45);
+}
+
+:root {
+  @include light-theme;
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  --header-height: 64px;
+  --container-max: 1360px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+// Big monitors get a wider canvas (more columns), not just bigger margins.
+@media (min-width: 1680px) {
+  :root {
+    --container-max: 1640px;
+  }
+}
+
+@media (min-width: 2200px) {
+  :root {
+    --container-max: 2000px;
+  }
+}
+
+:root[data-theme='dark'] {
+  @include dark-theme;
+}

@@ -1,0 +1,150 @@
+@let a = auction();
+@let v = vehicle();
+<section class="panel card" aria-labelledby="bid-panel-title">
+  <h2 id="bid-panel-title" class="sr-only">Bidding</h2>
+
+  <div class="status-row">
+    <app-lot-status [auction]="a" />
+    @if (a.status === 'open') {
+      <span class="closes muted">Closes {{ closesAtLabel() }}</span>
+    }
+  </div>
+
+  @switch (v.myStatus) {
+    @case ('winning') {
+      <div class="banner banner--success" role="status">
+        <svg appIcon="circle-check" [size]="18" [strokeWidth]="2.2"></svg>
+        <div>
+          <strong>You're the high bidder</strong>
+          @if (a.reserveStatus === 'not_met') {
+            <span>The reserve hasn't been met yet, so this may not sell at your bid.</span>
+          } @else {
+            <span>We'll let you know if someone outbids you.</span>
+          }
+        </div>
+      </div>
+    }
+    @case ('outbid') {
+      <div class="banner banner--danger" role="alert">
+        <svg appIcon="circle-exclamation-point" [size]="18" [strokeWidth]="2.2"></svg>
+        <div>
+          <strong>You've been outbid</strong>
+          <span>Your highest bid was {{ v.myMaxBid | money }}. Bid again to get back in front.</span>
+        </div>
+      </div>
+    }
+    @case ('won') {
+      <div class="banner banner--success" role="status">
+        <svg appIcon="trophy" [size]="18" [strokeWidth]="2.2"></svg>
+        <div>
+          <strong>You won this vehicle</strong>
+          <span>The selling dealership will be in touch to arrange payment and pickup.</span>
+        </div>
+      </div>
+    }
+    @case ('lost') {
+      <div class="banner" role="status">
+        <div>
+          <strong>You didn't win this one</strong>
+          <span>Your highest bid was {{ v.myMaxBid | money }}.</span>
+        </div>
+      </div>
+    }
+  }
+
+  <div class="price-block" #priceBlock>
+    <p class="eyebrow">{{ priceLabel() }}</p>
+    <p class="price tabular" aria-live="polite">{{ a.currentBid ?? a.startingBid | money }}</p>
+    <div class="price-meta">
+      <span class="tabular">{{ a.bidCount }} {{ a.bidCount === 1 ? 'bid' : 'bids' }}</span>
+      <app-reserve-badge [status]="a.reserveStatus" />
+    </div>
+  </div>
+
+  @if (a.status === 'open') {
+    @if (!isLeading()) {
+      <div class="bid-form">
+        <div class="quick" role="group" aria-label="Quick bid amounts">
+          @for (option of quickBids(); track $index) {
+            <button
+              type="button"
+              class="quick-btn tabular"
+              [attr.aria-pressed]="!customText() && amount() === option"
+              (click)="chooseQuick(option)"
+            >
+              {{ option | money }}
+            </button>
+          }
+        </div>
+
+        <label class="amount-field">
+          <span class="sr-only">Custom bid amount</span>
+          <span class="prefix" aria-hidden="true">$</span>
+          <input
+            #amountInput
+            class="input tabular"
+            inputmode="numeric"
+            autocomplete="off"
+            placeholder="Or enter your own amount"
+            [value]="customText()"
+            [attr.aria-invalid]="amountError() !== null"
+            aria-describedby="bid-hint"
+            (input)="onAmountInput($event)"
+            (keydown.enter)="placeBid()"
+          />
+        </label>
+
+        @if (amountError(); as error) {
+          <p class="field-error" id="bid-hint">{{ error }}</p>
+        } @else {
+          <p class="hint muted" id="bid-hint">
+            Minimum bid {{ a.minNextBid | money }} · increments of {{ a.bidIncrement | money }}
+          </p>
+        }
+
+        <button type="button" class="btn btn--cta btn--lg btn--block" [disabled]="!canBid()" (click)="placeBid()">
+          <svg appIcon="gavel" [size]="18" [strokeWidth]="2.2"></svg>
+          {{ submitting() ? 'Placing bid…' : 'Place bid · ' + (amount() | money) }}
+        </button>
+      </div>
+    } @else {
+      <p class="leading-note muted">You can bid again once another buyer outbids you.</p>
+    }
+
+    @if (serverMessage(); as message) {
+      <p class="server-message" [attr.data-tone]="message.tone" role="alert">{{ message.text }}</p>
+    }
+
+    @if (a.buyNowAvailable && a.buyNowPrice !== null) {
+      <div class="buy-now">
+        <div>
+          <p class="eyebrow">Skip the auction</p>
+          <p class="buy-now-price tabular">{{ a.buyNowPrice | money }}</p>
+        </div>
+        <button type="button" class="btn btn--cta-outline" [disabled]="submitting()" (click)="buyNow()">
+          <svg appIcon="zap" [size]="16" [strokeWidth]="2.2"></svg>
+          Buy now
+        </button>
+      </div>
+    }
+
+    <p class="trust muted">
+      <svg appIcon="shield-check" [size]="14" [strokeWidth]="2.2"></svg>
+      Bids are binding. A bid in the final 2 minutes extends the auction by 2 minutes.
+    </p>
+  } @else {
+    <p class="ended-note muted">
+      @switch (a.outcome) {
+        @case ('sold') {
+          {{ a.soldViaBuyNow ? 'Sold with Buy Now.' : 'Sold when the auction closed.' }}
+        }
+        @case ('reserve_not_met') {
+          Bidding closed below the seller's reserve, so this vehicle didn't sell.
+        }
+        @default {
+          Bidding closed with no bids.
+        }
+      }
+    </p>
+  }
+</section>

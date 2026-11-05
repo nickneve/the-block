@@ -1,0 +1,63 @@
+@let v = vehicle();
+<a class="card vehicle-card" [routerLink]="['/vehicles', v.id]" [class.is-outbid]="v.myStatus === 'outbid'">
+  <div class="media">
+    <app-vehicle-image [src]="v.thumbnail" [alt]="title() + ' ' + v.trim" [paint]="v.exteriorColor" />
+    <div class="media-top">
+      <div class="media-chips">
+        <app-lot-status [auction]="v.auction" variant="overlay" />
+        @if (isNew()) {
+          <span class="chip chip--new"><svg appIcon="sparkles" [size]="12" [strokeWidth]="2.4"></svg>New</span>
+        }
+      </div>
+      <app-watch-button [vehicleId]="v.id" variant="overlay" />
+    </div>
+
+    <!-- Prices ride on the photo, like the timer, so the card body stays short. -->
+    <div class="media-bottom">
+      <div class="bid-stack">
+        @if (v.myStatus) {
+          <app-my-status-badge [status]="v.myStatus" />
+        }
+        <p class="price-tag">
+          <span class="tag-label">{{ priceTagLabel() }}</span>
+          <span class="tag-amount tabular">{{ price() | money }}</span>
+        </p>
+      </div>
+      @if (v.auction.buyNowAvailable && v.auction.buyNowPrice !== null) {
+        <p class="price-tag price-tag--buy-now">
+          <span class="tag-label"><svg appIcon="zap" [size]="12" [strokeWidth]="2.4"></svg>Buy now</span>
+          <span class="tag-amount tabular">{{ v.auction.buyNowPrice | money }}</span>
+        </p>
+      }
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="heading">
+      <h3 class="title">{{ title() }}</h3>
+      <p class="subtitle">{{ v.trim }} · Lot {{ v.lot }}</p>
+    </div>
+
+    <ul class="meta">
+      <li>
+        <svg appIcon="gauge" [size]="14" [strokeWidth]="2"></svg>
+        <span class="tabular">{{ v.odometerKm | km }}</span>
+        @if (reserve(); as reserve) {
+          <span class="chip chip--sm" [class.chip--primary]="reserve.tone === 'primary'">{{ reserve.text }}</span>
+        }
+      </li>
+      <li>
+        <svg appIcon="map-pin" [size]="14" [strokeWidth]="2"></svg>
+        <span class="place">{{ v.city }}, {{ v.province | province }}</span>
+        @if (distance(); as distance) {
+          <span class="distance">· {{ distance }}</span>
+        }
+      </li>
+    </ul>
+
+    <div class="tags">
+      <app-condition-grade [grade]="v.conditionGrade" />
+      <app-title-badge [status]="v.titleStatus" [showClean]="true" cleanTone="quiet" />
+    </div>
+  </div>
+</a>
