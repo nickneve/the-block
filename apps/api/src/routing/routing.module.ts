@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
-import { APP_CONFIG, AppConfig } from '../config/app-config';
+import { APP_CONFIG } from '../config/app-config';
+import type { AppConfig } from '../config/app-config';
 import { osrmRouteTable, RoadDistancesService, ROUTE_TABLE } from './road-distances';
 
 @Module({

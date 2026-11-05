@@ -3,7 +3,8 @@ import Database from 'better-sqlite3';
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { distanceKm } from '../common/geo';
-import { APP_CONFIG, AppConfig } from '../config/app-config';
+import { APP_CONFIG } from '../config/app-config';
+import type { AppConfig } from '../config/app-config';
 import { SCHEMA_SQL, SCHEMA_VERSION, TABLES } from './schema';
 
 /**

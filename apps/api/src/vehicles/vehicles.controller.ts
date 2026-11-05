@@ -3,7 +3,7 @@ import { BidderId } from '../bidders/bidder-id.decorator';
 import { BuyerLocation } from '../bidders/buyer-location.decorator';
 import type { GeoPoint } from '../common/geo';
 import { QueryVehiclesDto } from './dto/query-vehicles.dto';
-import { FacetsDto, VehicleDetailDto, VehiclePageDto } from './vehicle.dto';
+import type { FacetsDto, VehicleDetailDto, VehiclePageDto } from './vehicle.dto';
 import { VehiclesService } from './vehicles.service';
 
 @Controller('vehicles')

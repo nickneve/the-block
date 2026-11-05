@@ -2,7 +2,8 @@ import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPip
 import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsObject, IsString, MaxLength } from 'class-validator';
 import { BidderId } from '../bidders/bidder-id.decorator';
-import { SavedSearchDto, SavedSearchesService } from './saved-searches.service';
+import { SavedSearchesService } from './saved-searches.service';
+import type { SavedSearchDto } from './saved-searches.service';
 
 export class CreateSavedSearchDto {
   @Transform(({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim() : value))

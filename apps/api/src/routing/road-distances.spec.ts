@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { CITY_COORDINATES } from '../database/seed/city-coordinates';
 import { osrmRouteTable, RoadDistancesService, RouteTable } from './road-distances';
 
@@ -29,10 +30,12 @@ describe('RoadDistancesService', () => {
   });
 
   it('falls back to straight-line when routing fails or is turned off', async () => {
-    jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const warn = jest.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
     const failing = new RoadDistancesService(() => Promise.reject(new Error('timeout')));
     await expect(failing.fromOrigin(buffalo)).resolves.toBeNull();
     await expect(new RoadDistancesService(null).fromOrigin(buffalo)).resolves.toBeNull();
+    expect(warn).toHaveBeenCalledTimes(1);
+    warn.mockRestore();
   });
 });
 
