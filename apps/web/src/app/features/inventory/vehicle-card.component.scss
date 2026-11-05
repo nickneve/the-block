@@ -29,84 +29,83 @@
   }
 }
 
-// --- Photo and the tags on it ---------------------------------------------------
+// --- Photo -------------------------------------------------------------------------
 
 .media {
   position: relative;
 }
 
-.media-top,
-.media-bottom {
+.media-top {
   position: absolute;
+  top: var(--space-3);
   left: var(--space-3);
   right: var(--space-3);
   display: flex;
-  justify-content: space-between;
-  gap: var(--space-2);
-}
-
-.media-top {
-  top: var(--space-3);
-  align-items: flex-start;
-}
-
-.media-chips {
-  display: flex;
   flex-wrap: wrap;
   gap: var(--space-1) var(--space-2);
+
+  .chip {
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
+  }
 }
 
-.media-bottom {
-  bottom: var(--space-3);
+// A soft fade, not a box: dark enough to read white text on any paint colour (or a real photo).
+.price-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
   align-items: flex-end;
-}
-
-.bid-stack {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-2);
-  min-width: 0;
-}
-
-// Same dark glass as the timer chip, so price and time read as one system.
-.price-tag {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  padding: 6px 10px 7px;
-  border-radius: var(--radius-sm);
-  background: var(--overlay-chip);
+  gap: var(--space-4);
+  padding: 32px 14px 11px;
+  background: linear-gradient(to top, rgb(10 15 28 / 0.82), rgb(10 15 28 / 0.55) 55%, transparent);
   color: #fff;
-  line-height: 1.15;
-  backdrop-filter: blur(6px);
 }
 
-.tag-label {
+.bar-figure {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.1;
+}
+
+.bar-label {
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  font-size: 12px;
+  margin-bottom: 2px;
+  font-size: 11.5px;
   font-weight: 600;
+  letter-spacing: 0.02em;
+  opacity: 0.8;
   white-space: nowrap;
-  opacity: 0.82;
 }
 
-.tag-amount {
-  font-size: 18px;
+.bar-price {
+  font-size: 20px;
   font-weight: 800;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
 }
 
-// Buy Now is an action price, so it carries the action colour.
-.price-tag--buy-now {
-  align-items: flex-end;
-  background: var(--cta);
-  color: var(--cta-contrast);
-
-  .tag-label {
-    opacity: 0.92;
+// Buy Now keeps a hint of the action colour without becoming a second headline.
+.bar-figure--buy {
+  .bar-label {
+    color: #fdba74;
+    opacity: 1;
   }
+}
+
+.bar-buy {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  padding-bottom: 1px;
+}
+
+.bar-time {
+  margin-left: auto;
+  padding-bottom: 2px;
 }
 
 // --- Details ------------------------------------------------------------------------
@@ -116,13 +115,27 @@
   flex: 1;
   flex-direction: column;
   gap: var(--space-3);
-  padding: var(--space-4);
+  padding: 14px var(--space-4) var(--space-4);
+}
+
+.heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.titles {
+  min-width: 0;
 }
 
 .title {
   font-size: 17px;
   font-weight: 700;
   letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .subtitle {
@@ -132,6 +145,12 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+// Pulled into the corner so the star lines up with the title, not the padding.
+.watch {
+  flex: none;
+  margin: -6px -8px 0 0;
 }
 
 .meta {

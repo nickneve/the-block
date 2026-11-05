@@ -2,40 +2,40 @@
 <a class="card vehicle-card" [routerLink]="['/vehicles', v.id]" [class.is-outbid]="v.myStatus === 'outbid'">
   <div class="media">
     <app-vehicle-image [src]="v.thumbnail" [alt]="title() + ' ' + v.trim" [paint]="v.exteriorColor" />
-    <div class="media-top">
-      <div class="media-chips">
-        <app-lot-status [auction]="v.auction" variant="overlay" />
+
+    <!-- The top of the photo stays clear unless something is about you or new. -->
+    @if (v.myStatus || isNew()) {
+      <div class="media-top">
+        <app-my-status-badge [status]="v.myStatus" />
         @if (isNew()) {
           <span class="chip chip--new"><svg appIcon="sparkles" [size]="12" [strokeWidth]="2.4"></svg>New</span>
         }
       </div>
-      <app-watch-button [vehicleId]="v.id" variant="overlay" />
-    </div>
+    }
 
-    <!-- Prices ride on the photo, like the timer, so the card body stays short. -->
-    <div class="media-bottom">
-      <div class="bid-stack">
-        @if (v.myStatus) {
-          <app-my-status-badge [status]="v.myStatus" />
-        }
-        <p class="price-tag">
-          <span class="tag-label">{{ priceTagLabel() }}</span>
-          <span class="tag-amount tabular">{{ price() | money }}</span>
-        </p>
-      </div>
+    <!-- One bar across the bottom: what it costs now, what it costs to end it, and how long is left. -->
+    <div class="price-bar">
+      <p class="bar-figure">
+        <span class="bar-label">{{ priceLabel() }}</span>
+        <span class="bar-price tabular">{{ price() | money }}</span>
+      </p>
       @if (v.auction.buyNowAvailable && v.auction.buyNowPrice !== null) {
-        <p class="price-tag price-tag--buy-now">
-          <span class="tag-label"><svg appIcon="zap" [size]="12" [strokeWidth]="2.4"></svg>Buy now</span>
-          <span class="tag-amount tabular">{{ v.auction.buyNowPrice | money }}</span>
+        <p class="bar-figure bar-figure--buy">
+          <span class="bar-label"><svg appIcon="zap" [size]="11" [strokeWidth]="2.6"></svg>Buy now</span>
+          <span class="bar-buy tabular">{{ v.auction.buyNowPrice | money }}</span>
         </p>
       }
+      <app-lot-status class="bar-time" [auction]="v.auction" variant="scrim" />
     </div>
   </div>
 
   <div class="body">
     <div class="heading">
-      <h3 class="title">{{ title() }}</h3>
-      <p class="subtitle">{{ v.trim }} · Lot {{ v.lot }}</p>
+      <div class="titles">
+        <h3 class="title">{{ title() }}</h3>
+        <p class="subtitle">{{ v.trim }} · Lot {{ v.lot }}</p>
+      </div>
+      <app-watch-button class="watch" [vehicleId]="v.id" variant="ghost" />
     </div>
 
     <ul class="meta">

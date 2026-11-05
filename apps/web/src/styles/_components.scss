@@ -392,6 +392,11 @@ input[type='radio'] {
   animation: dialog-in 0.18s var(--ease);
 }
 
+/* Room for side-by-side choices, e.g. payment and delivery when confirming a bid. */
+.tb-dialog--wide {
+  width: min(560px, calc(100vw - 32px));
+}
+
 @keyframes dialog-in {
   from {
     opacity: 0;

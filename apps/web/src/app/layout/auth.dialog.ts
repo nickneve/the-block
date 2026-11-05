@@ -6,9 +6,12 @@ import { Account, AccountService } from '../core/account.service';
 import { IconComponent } from '../shared/ui/icon.component';
 
 export type AuthMode = 'sign-in' | 'create';
+/** Why the dialog opened, when something the buyer tried needs an account. */
+export type AuthReason = 'bid' | 'buy_now';
 
 export interface AuthDialogData {
   mode: AuthMode;
+  reason?: AuthReason;
 }
 
 /** How long the simulated "server" takes, so the busy state is visible. */
@@ -29,9 +32,13 @@ const MIN_PASSWORD = 8;
     <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
       <header class="head">
         <div>
-          <h2 id="auth-title">{{ mode() === 'sign-in' ? 'Sign in' : 'Create your account' }}</h2>
+          <h2 id="auth-title">{{ title() }}</h2>
           <p class="lede">
-            @if (mode() === 'sign-in') {
+            @if (reason) {
+              {{ reason === 'bid' ? 'Bids are binding' : 'Buying is binding' }}, so sellers need to know which dealership
+              they're dealing with. It takes a minute, and you'll go straight back to your
+              {{ reason === 'bid' ? 'bid' : 'purchase' }}.
+            } @else if (mode() === 'sign-in') {
               Welcome back. Your bids, watchlist and saved searches are where you left them.
             } @else {
               Bid on dealer inventory from across Canada. Everything you've done as a guest comes with you.
@@ -240,6 +247,12 @@ export class AuthDialog {
   private readonly fb = inject(NonNullableFormBuilder);
 
   protected readonly mode = signal<AuthMode>(this.data.mode);
+  protected readonly reason = this.data.reason;
+  protected readonly title = computed(() => {
+    const action = this.reason === 'buy_now' ? 'buy' : 'bid';
+    if (this.mode() === 'sign-in') return this.reason ? `Sign in to ${action}` : 'Sign in';
+    return this.reason ? `Create an account to ${action}` : 'Create your account';
+  });
   protected readonly busy = signal(false);
   protected readonly showPassword = signal(false);
   private readonly submitted = signal(false);

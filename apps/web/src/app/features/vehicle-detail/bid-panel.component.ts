@@ -12,11 +12,13 @@ import {
   viewChild,
 } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
+import { AccountService } from '../../core/account.service';
 import { AuctionApi, toApiError } from '../../core/api/auction-api';
 import { VehicleDetail } from '../../core/api/models';
 import { MyBidsStore } from '../../core/state/my-bids.store';
 import { ToastService } from '../../core/toast.service';
-import { formatDateTime, formatMoney, vehicleName } from '../../shared/format';
+import { AuthPrompt } from '../../layout/auth-prompt.service';
+import { formatDateTime, formatMoney, provinceCode, vehicleName } from '../../shared/format';
 import { MoneyPipe } from '../../shared/pipes';
 import { ReserveBadgeComponent } from '../../shared/ui/badges.component';
 import { IconComponent } from '../../shared/ui/icon.component';
@@ -49,6 +51,9 @@ export class BidPanelComponent {
   private readonly dialog = inject(Dialog);
   private readonly toasts = inject(ToastService);
   private readonly myBids = inject(MyBidsStore);
+  private readonly authPrompt = inject(AuthPrompt);
+  /** Guests can look and plan; bidding asks them to sign in first. */
+  protected readonly signedIn = inject(AccountService).signedIn;
   private readonly amountInput = viewChild<ElementRef<HTMLInputElement>>('amountInput');
   private readonly priceBlock = viewChild<ElementRef<HTMLElement>>('priceBlock');
 
@@ -118,6 +123,7 @@ export class BidPanelComponent {
   protected async placeBid(): Promise<void> {
     if (!this.canBid()) return;
     const amount = this.amount();
+    if (!(await this.authPrompt.ensureSignedIn('bid'))) return;
     if (!(await this.confirm('bid', amount))) return;
 
     this.submit(this.api.placeBid(this.vehicle().id, amount), () => {
@@ -128,6 +134,7 @@ export class BidPanelComponent {
   protected async buyNow(): Promise<void> {
     const price = this.auction().buyNowPrice;
     if (price === null || !this.auction().buyNowAvailable || this.submitting()) return;
+    if (!(await this.authPrompt.ensureSignedIn('buy_now'))) return;
     if (!(await this.confirm('buy_now', price))) return;
 
     this.submit(this.api.buyNow(this.vehicle().id), () => {
@@ -141,11 +148,14 @@ export class BidPanelComponent {
       data: {
         kind,
         amount,
+        vehicleId: vehicle.id,
         vehicleName: `${vehicleName(vehicle)} ${vehicle.trim}`,
         lot: vehicle.lot,
         minNextBid: vehicle.auction.minNextBid,
         buyNowPrice: vehicle.auction.buyNowAvailable ? vehicle.auction.buyNowPrice : null,
         titleStatus: vehicle.titleStatus,
+        pickupFrom: `${vehicle.sellingDealership}, ${vehicle.city}, ${provinceCode(vehicle.province)}`,
+        distanceKm: vehicle.distanceKm,
       },
       ariaLabelledBy: 'confirm-bid-title',
       backdropClass: 'cdk-overlay-dark-backdrop',

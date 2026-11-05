@@ -14,6 +14,13 @@ export function formatMoney(amount: number): string {
   return money.format(amount);
 }
 
+const cents = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' });
+
+/** "$4.21", for small amounts where the cents matter (e.g. a floor plan's daily interest). */
+export function formatCents(amount: number): string {
+  return cents.format(amount);
+}
+
 export function formatKm(km: number): string {
   return `${integer.format(km)} km`;
 }
@@ -80,9 +87,9 @@ export function gradeBand(grade: number): GradeBand {
   return { label: 'Rough', tone: 'danger' };
 }
 
-/** "420 km by road", or "352 km away" for a straight-line fallback. */
+/** "420 km by road", "352 km away" for a straight-line fallback, or "Near you" in the same city. */
 export function formatDistance(km: number, basis: 'road' | 'straight_line' | null = null): string {
-  if (km < 1) return 'Under 1 km away';
+  if (km < 5) return 'Near you';
   return basis === 'road' ? `${integer.format(km)} km by road` : `${integer.format(km)} km away`;
 }
 

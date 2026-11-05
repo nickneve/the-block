@@ -3,7 +3,7 @@ import { RouterLink } from '@angular/router';
 import { VehicleSummary } from '../../core/api/models';
 import { ClockService } from '../../core/clock.service';
 import { formatDistance } from '../../shared/format';
-import { bidCountLabel, displayPrice, priceLabel, reservePill } from '../../shared/lot-view';
+import { displayPrice, priceLabel, reservePill } from '../../shared/lot-view';
 import { KmPipe, MoneyPipe, ProvincePipe } from '../../shared/pipes';
 import { isNewListing } from '../../shared/time';
 import { MyStatusBadgeComponent, TitleBadgeComponent } from '../../shared/ui/badges.component';
@@ -13,7 +13,10 @@ import { LotStatusComponent } from '../../shared/ui/lot-status.component';
 import { VehicleImageComponent } from '../../shared/ui/vehicle-image.component';
 import { WatchButtonComponent } from '../../shared/ui/watch-button.component';
 
-/** Photo-first lot card for the grid view. */
+/**
+ * Photo-first lot card for the grid view. Price, Buy Now and time left share
+ * one bar across the photo; the body holds what the car is and where.
+ */
 @Component({
   selector: 'app-vehicle-card',
   imports: [
@@ -43,12 +46,8 @@ export class VehicleCardComponent {
     return `${year} ${make} ${model}`;
   });
 
-  /** "Current bid · 5 bids", "Starting bid", "Sold for". */
-  protected readonly priceTagLabel = computed(() => {
-    const { auction } = this.vehicle();
-    const label = priceLabel(auction);
-    return auction.status === 'open' && auction.bidCount > 0 ? `${label} · ${bidCountLabel(auction.bidCount)}` : label;
-  });
+  /** "Current bid", "Starting bid", "Sold for". The bid count lives on the detail page. */
+  protected readonly priceLabel = computed(() => priceLabel(this.vehicle().auction));
   protected readonly price = computed(() => displayPrice(this.vehicle().auction));
   protected readonly reserve = computed(() => reservePill(this.vehicle().auction));
   protected readonly distance = computed(() => {

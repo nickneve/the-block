@@ -7,7 +7,7 @@
         Signed in as <strong>{{ signedIn.name }}</strong>. Other bidders see you as
         <strong>{{ bidder.handle() ?? '…' }}</strong>.
       } @else {
-        You're bidding as a guest. Other bidders see you as <strong>{{ bidder.handle() ?? '…' }}</strong>.
+        You're browsing as a guest; sign in to bid. Other bidders see you as <strong>{{ bidder.handle() ?? '…' }}</strong>.
       }
       @if (store.outbid().length > 0) {
         <span class="attention">

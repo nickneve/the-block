@@ -106,6 +106,9 @@
           <svg appIcon="gavel" [size]="18" [strokeWidth]="2.2"></svg>
           {{ submitting() ? 'Placing bid…' : 'Place bid · ' + (amount() | money) }}
         </button>
+        @if (!signedIn()) {
+          <p class="hint muted guest-hint">You'll sign in or create an account first. It takes a minute.</p>
+        }
       </div>
     } @else {
       <p class="leading-note muted">You can bid again once another buyer outbids you.</p>

@@ -39,8 +39,11 @@ describe('checkBid', () => {
 describe('confirmationNotes', () => {
   const base: ConfirmBidData = {
     kind: 'bid',
+    vehicleId: 'v1',
     vehicleName: '2023 Ford Bronco',
     lot: 'A-0043',
+    pickupFrom: 'Maple Motors, Hamilton, ON',
+    distanceKm: 90,
     amount: 21_250,
     minNextBid: 21_250,
     buyNowPrice: null,

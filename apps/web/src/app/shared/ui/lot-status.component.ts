@@ -14,7 +14,7 @@ import { IconComponent } from './icon.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (auction().status === 'open') {
-      <span class="chip" [class]="openClass()" [attr.aria-label]="'Closes in ' + remaining()">
+      <span [class]="openClass()" [attr.aria-label]="'Closes in ' + remaining()">
         @if (tone() === 'calm') {
           <svg appIcon="clock" [size]="13" [strokeWidth]="2.4"></svg>
         } @else {
@@ -26,7 +26,7 @@ import { IconComponent } from './icon.component';
         }
       </span>
     } @else {
-      <span class="chip" [class]="endedClass()">
+      <span [class]="endedClass()">
         @if (auction().outcome === 'sold') {
           <svg appIcon="badge-check" [size]="13" [strokeWidth]="2.4"></svg>
         } @else {
@@ -44,12 +44,28 @@ import { IconComponent } from './icon.component';
       font-weight: 500;
       opacity: 0.85;
     }
+    /* On the card's dark price bar: text, not a chip. Urgency still shows as amber, then red. */
+    .on-scrim {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: #fff;
+      font-size: 13.5px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .on-scrim--soon {
+      color: #fcd34d;
+    }
+    .on-scrim--urgent {
+      color: #fca5a5;
+    }
   `,
 })
 export class LotStatusComponent {
   readonly auction = input.required<AuctionState>();
-  /** "overlay" sits on top of a photo; "plain" sits on a surface. */
-  readonly variant = input<'overlay' | 'plain'>('plain');
+  /** "scrim" sits on the dark bar across a card photo; "plain" sits on a surface. */
+  readonly variant = input<'scrim' | 'plain'>('plain');
 
   private readonly clock = inject(ClockService);
 
@@ -59,13 +75,14 @@ export class LotStatusComponent {
 
   protected readonly openClass = computed(() => {
     const tone = this.tone();
+    if (this.variant() === 'scrim') return tone === 'calm' ? 'on-scrim' : `on-scrim on-scrim--${tone}`;
     if (tone === 'urgent') return 'chip chip--danger';
     if (tone === 'soon') return 'chip chip--warning';
-    return this.variant() === 'overlay' ? 'chip chip--overlay' : 'chip';
+    return 'chip';
   });
 
   protected readonly endedClass = computed(() => {
-    if (this.variant() === 'overlay') return 'chip chip--overlay';
+    if (this.variant() === 'scrim') return 'on-scrim';
     return this.auction().outcome === 'sold' ? 'chip chip--primary' : 'chip';
   });
 

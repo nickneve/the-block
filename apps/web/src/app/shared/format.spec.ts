@@ -14,8 +14,9 @@ describe('formatAge', () => {
 });
 
 describe('formatDistance', () => {
-  it('rounds to whole km with a floor for "right here"', () => {
-    expect(formatDistance(0)).toBe('Under 1 km away');
+  it('rounds to whole km, and calls the same city "Near you"', () => {
+    expect(formatDistance(0)).toBe('Near you');
+    expect(formatDistance(4, 'road')).toBe('Near you');
     expect(formatDistance(1234)).toBe('1,234 km away');
     expect(formatDistance(420, 'road')).toBe('420 km by road');
     expect(formatDistance(352, 'straight_line')).toBe('352 km away');

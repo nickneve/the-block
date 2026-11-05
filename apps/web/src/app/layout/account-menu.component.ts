@@ -3,7 +3,7 @@ import { CdkMenu, CdkMenuGroup, CdkMenuItem, CdkMenuItemRadio, CdkMenuTrigger } 
 import { ConnectedPosition } from '@angular/cdk/overlay';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Account, AccountService } from '../core/account.service';
+import { AccountService } from '../core/account.service';
 import { BidderService } from '../core/bidder.service';
 import { BuyerLocationService } from '../core/location.service';
 import { MyBidsStore } from '../core/state/my-bids.store';
@@ -15,6 +15,7 @@ import { LocationDialog } from '../shared/location.dialog';
 import { IconComponent } from '../shared/ui/icon.component';
 import type { IconName } from '../shared/ui/icons';
 import { AccountAvatarComponent } from './account-avatar.component';
+import { AuthPrompt } from './auth-prompt.service';
 import type { AuthMode } from './auth.dialog';
 
 const MENU_BELOW_END: ConnectedPosition[] = [
@@ -62,7 +63,7 @@ const MENU_BELOW_END: ConnectedPosition[] = [
               <p class="who-sub">{{ signedIn.dealership || signedIn.email }}</p>
             } @else {
               <p class="who-name">Guest buyer</p>
-              <p class="who-sub">Not signed in</p>
+              <p class="who-sub">Sign in to bid</p>
             }
           </div>
         </div>
@@ -258,6 +259,7 @@ export class AccountMenuComponent {
   private readonly myBids = inject(MyBidsStore);
   private readonly accounts = inject(AccountService);
   private readonly dialog = inject(Dialog);
+  private readonly authPrompt = inject(AuthPrompt);
   private readonly toasts = inject(ToastService);
 
   protected readonly account = this.accounts.account;
@@ -271,23 +273,18 @@ export class AccountMenuComponent {
   ];
 
   protected async openAuth(mode: AuthMode): Promise<void> {
-    // Loaded on demand: the forms code isn't needed until someone signs in.
-    const { AuthDialog } = await import('./auth.dialog');
-    this.dialog
-      .open<Account>(AuthDialog, { data: { mode }, ariaLabelledBy: 'auth-title' })
-      .closed.subscribe((account) => {
-        if (!account) return;
-        this.toasts.show(
-          mode === 'sign-in'
-            ? { tone: 'success', title: `Signed in as ${account.name}`, message: 'Welcome back.' }
-            : {
-                tone: 'success',
-                title: `Welcome to The Block, ${account.name.split(' ')[0]}`,
-                message: 'Your bids, watchlist and saved searches are now on your account.',
-              },
-          4000,
-        );
-      });
+    const account = await this.authPrompt.open(mode);
+    if (!account) return;
+    this.toasts.show(
+      mode === 'sign-in'
+        ? { tone: 'success', title: `Signed in as ${account.name}`, message: 'Welcome back.' }
+        : {
+            tone: 'success',
+            title: `Welcome to The Block, ${account.name.split(' ')[0]}`,
+            message: 'Your bids, watchlist and saved searches are now on your account.',
+          },
+      4000,
+    );
   }
 
   protected openLocation(): void {
@@ -296,6 +293,6 @@ export class AccountMenuComponent {
 
   protected signOut(): void {
     this.accounts.signOut();
-    this.toasts.show({ tone: 'info', title: 'Signed out', message: 'You can keep browsing and bidding as a guest.' }, 3500);
+    this.toasts.show({ tone: 'info', title: 'Signed out', message: 'You can keep browsing as a guest. Sign in again to bid.' }, 3500);
   }
 }

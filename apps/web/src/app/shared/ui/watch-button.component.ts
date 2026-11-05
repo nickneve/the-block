@@ -12,6 +12,7 @@ import { IconComponent } from './icon.component';
       class="watch"
       [class.watch--overlay]="variant() === 'overlay'"
       [class.watch--labelled]="variant() === 'labelled'"
+      [class.watch--ghost]="variant() === 'ghost'"
       [attr.aria-pressed]="watched()"
       [attr.aria-label]="variant() === 'labelled' ? null : (watched() ? 'Remove from watchlist' : 'Add to watchlist')"
       (click)="toggle($event)"
@@ -55,6 +56,16 @@ import { IconComponent } from './icon.component';
     .watch--overlay:hover {
       color: #fff;
     }
+    .watch--ghost {
+      width: 36px;
+      height: 36px;
+      border-color: transparent;
+      background: transparent;
+      color: var(--text-subtle);
+    }
+    .watch--ghost:hover {
+      background: var(--surface-muted);
+    }
     .watch--labelled {
       display: inline-flex;
       gap: 8px;
@@ -74,7 +85,7 @@ import { IconComponent } from './icon.component';
 })
 export class WatchButtonComponent {
   readonly vehicleId = input.required<string>();
-  readonly variant = input<'overlay' | 'plain' | 'labelled'>('plain');
+  readonly variant = input<'overlay' | 'plain' | 'ghost' | 'labelled'>('plain');
 
   private readonly watchlist = inject(WatchlistStore);
   protected readonly watched = computed(() => this.watchlist.ids().has(this.vehicleId()));
