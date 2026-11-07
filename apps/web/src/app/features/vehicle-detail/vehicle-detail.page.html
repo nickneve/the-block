@@ -29,9 +29,9 @@
     @default {
       @if (vehicle(); as v) {
         <header class="head">
-          <div class="head-main">
-            <p class="eyebrow">Lot {{ v.lot }} · {{ v.bodyStyle | humanize }}</p>
-            <h1>{{ name() }} <span class="trim">{{ v.trim }}</span></h1>
+          <p class="eyebrow">Lot {{ v.lot }} · {{ v.bodyStyle | humanize }}</p>
+          <h1>{{ name() }} <span class="trim">{{ v.trim }}</span></h1>
+          <div class="head-info">
             <ul class="head-meta">
               <li><svg appIcon="gauge" [size]="16"></svg>{{ v.odometerKm | km }}</li>
               <li>
@@ -53,12 +53,11 @@
               <app-my-status-badge [status]="v.myStatus" />
             </div>
           </div>
-          <app-watch-button [vehicleId]="v.id" variant="labelled" />
         </header>
 
         <div class="columns">
           <div class="gallery-area">
-            <app-gallery [images]="v.images" [alt]="name() + ' ' + v.trim" [paint]="v.exteriorColor" />
+            <app-gallery [images]="v.images" [alt]="name() + ' ' + v.trim" [paint]="v.exteriorColor" [vehicleId]="v.id" />
           </div>
 
           <aside class="panel-area" #bidPanelAnchor (appInView)="panelInView.set($event)">
@@ -170,12 +169,6 @@
                     <span class="muted">Vehicle located on site</span>
                   </dd>
                 </div>
-                @if (listed(); as listed) {
-                  <div>
-                    <dt>Listed</dt>
-                    <dd>{{ listed.at }} <span class="muted">{{ listed.ago }}</span></dd>
-                  </div>
-                }
                 <div>
                   <dt>{{ v.auction.status === 'open' ? 'Closes' : 'Closed' }}</dt>
                   <dd>
@@ -183,18 +176,22 @@
                     @if (v.auction.extended) {
                       <span class="muted">Extended by late bids</span>
                     }
+                    @if (v.auction.status === 'open') {
+                      <app-add-to-calendar
+                        class="calendar"
+                        [name]="name() + ' ' + v.trim"
+                        [lot]="v.lot"
+                        [closesAt]="v.auction.closesAt"
+                        [location]="pickup()"
+                      />
+                    }
                   </dd>
-                </div>
-                <div>
-                  <dt>Lot</dt>
-                  <dd class="tabular">{{ v.lot }}</dd>
                 </div>
               </dl>
             </section>
           </div>
 
-          <div class="content-area">
-            <section class="card section condition" aria-labelledby="condition-title">
+            <section class="card section condition condition-area" aria-labelledby="condition-title">
               <div class="section-head">
                 <h2 class="section-title" id="condition-title">Condition report</h2>
                 <app-title-badge [status]="v.titleStatus" [showClean]="true" />
@@ -236,14 +233,13 @@
               }
             </section>
 
-            <section class="card section history-section" aria-labelledby="history-title">
+            <section class="card section history-section history-area" aria-labelledby="history-title">
               <div class="section-head">
                 <h2 class="section-title" id="history-title">Bid history</h2>
                 <span class="muted tabular">{{ v.auction.bidCount }} {{ v.auction.bidCount === 1 ? 'bid' : 'bids' }}</span>
               </div>
               <app-bid-history [bids]="v.recentBids" />
             </section>
-          </div>
         </div>
 
         @if (v.auction.status === 'open' && !panelInView()) {

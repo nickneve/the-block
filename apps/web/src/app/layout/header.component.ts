@@ -31,11 +31,12 @@ import { AccountMenuComponent } from './account-menu.component';
         </nav>
 
         <div class="end">
-          <span class="live" [attr.data-state]="live.connection()" [attr.title]="liveLabel()">
+          <!-- Commented out, was used for testing purposes -->
+          <!-- <span class="live" [attr.data-state]="live.connection()" [attr.title]="liveLabel()">
             <span class="dot" [class.dot--pulse]="live.connection() === 'live'"></span>
             <span class="live-label">{{ live.connection() === 'live' ? 'Live' : 'Reconnecting' }}</span>
             <span class="sr-only">{{ liveLabel() }}</span>
-          </span>
+          </span> -->
 
           <!-- The menu (and the dialog code behind it) loads once the page is idle; the button looks the same before. -->
           @defer (on idle) {

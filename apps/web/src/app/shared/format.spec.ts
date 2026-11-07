@@ -18,7 +18,7 @@ describe('formatDistance', () => {
     expect(formatDistance(0)).toBe('Near you');
     expect(formatDistance(4, 'road')).toBe('Near you');
     expect(formatDistance(1234)).toBe('1,234 km away');
-    expect(formatDistance(420, 'road')).toBe('420 km by road');
+    expect(formatDistance(420, 'road')).toBe('420 km');
     expect(formatDistance(352, 'straight_line')).toBe('352 km away');
   });
 });

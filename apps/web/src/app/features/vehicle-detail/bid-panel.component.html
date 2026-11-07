@@ -6,7 +6,16 @@
   <div class="status-row">
     <app-lot-status [auction]="a" />
     @if (a.status === 'open') {
-      <span class="closes muted">Closes {{ closesAtLabel() }}</span>
+      <span class="closes muted">
+        Closes {{ closesAtLabel() }}
+        <app-add-to-calendar
+          variant="icon"
+          [name]="v.year + ' ' + v.make + ' ' + v.model + ' ' + v.trim"
+          [lot]="v.lot"
+          [closesAt]="a.closesAt"
+          [location]="pickup()"
+        />
+      </span>
     }
   </div>
 

@@ -1,5 +1,5 @@
 import { contrast, mixHex, paintColor } from './paint';
-import { photoTint, tintedPhoto } from './placeholder-photo';
+import { photoTint, resizedPhoto, tintedPhoto } from './placeholder-photo';
 
 describe('placeholder photos', () => {
   const placeholder = 'https://placehold.co/800x600/1a1a2e/eaeaea?text=2023+Ford+Bronco+Photo+1';
@@ -22,6 +22,11 @@ describe('placeholder photos', () => {
         expect(contrast(background, text)).toBeGreaterThan(3);
       }
     }
+  });
+
+  it('asks for a bigger placeholder for full-screen viewing', () => {
+    expect(resizedPhoto(placeholder, 1600, 1200)).toBe('https://placehold.co/1600x1200/1a1a2e/eaeaea?text=2023+Ford+Bronco+Photo+1');
+    expect(resizedPhoto('https://cdn.example.com/front.jpg', 1600, 1200)).toBe('https://cdn.example.com/front.jpg');
   });
 
   it('leaves real photo URLs alone', () => {

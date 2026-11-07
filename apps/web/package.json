@@ -5,7 +5,7 @@
   "description": "Angular buyer experience for The Block",
   "scripts": {
     "ng": "ng",
-    "dev": "ng serve",
+    "dev": "ng serve --host 0.0.0.0",
     "build": "node scripts/ng.mjs build",
     "watch": "ng build --watch --configuration development",
     "test": "node scripts/ng.mjs test --watch=false"

@@ -20,6 +20,7 @@ import { ToastService } from '../../core/toast.service';
 import { AuthPrompt } from '../../layout/auth-prompt.service';
 import { formatDateTime, formatMoney, provinceCode, vehicleName } from '../../shared/format';
 import { MoneyPipe } from '../../shared/pipes';
+import { AddToCalendarComponent } from '../../shared/ui/add-to-calendar.component';
 import { ReserveBadgeComponent } from '../../shared/ui/badges.component';
 import { IconComponent } from '../../shared/ui/icon.component';
 import { LotStatusComponent } from '../../shared/ui/lot-status.component';
@@ -32,6 +33,7 @@ import { ConfirmBidData, ConfirmBidDialog } from './confirm-bid.dialog';
     MoneyPipe,
     LotStatusComponent,
     ReserveBadgeComponent,
+    AddToCalendarComponent,
     IconComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -81,6 +83,11 @@ export class BidPanelComponent {
   protected readonly isLeading = computed(() => this.vehicle().myStatus === 'winning');
   protected readonly quickBids = computed(() => quickBidAmounts(this.auction().minNextBid, this.auction().bidIncrement));
   protected readonly closesAtLabel = computed(() => formatDateTime(this.auction().closesAt));
+  /** "Golden Horseshoe Motors, London, ON": where the car is picked up. */
+  protected readonly pickup = computed(() => {
+    const vehicle = this.vehicle();
+    return `${vehicle.sellingDealership}, ${vehicle.city}, ${provinceCode(vehicle.province)}`;
+  });
 
   /** What "Place bid" will submit: typed amount, else a chosen quick bid (if still valid), else the minimum. */
   protected readonly amount = computed(() => {
@@ -154,7 +161,7 @@ export class BidPanelComponent {
         minNextBid: vehicle.auction.minNextBid,
         buyNowPrice: vehicle.auction.buyNowAvailable ? vehicle.auction.buyNowPrice : null,
         titleStatus: vehicle.titleStatus,
-        pickupFrom: `${vehicle.sellingDealership}, ${vehicle.city}, ${provinceCode(vehicle.province)}`,
+        pickupFrom: this.pickup(),
         distanceKm: vehicle.distanceKm,
       },
       ariaLabelledBy: 'confirm-bid-title',

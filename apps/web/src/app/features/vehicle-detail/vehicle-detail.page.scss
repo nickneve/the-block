@@ -1,5 +1,6 @@
 $desktop: 1024px;
-$wide: 1680px; // the container widens here (see tokens), leaving room for a third column
+$three-col: 1280px; // photo | facts | bid panel side by side
+$wide: 1680px; // the container widens here (see tokens)
 
 :host {
   display: block;
@@ -22,10 +23,6 @@ $wide: 1680px; // the container widens here (see tokens), leaving room for a thi
 // --- Header ----------------------------------------------------------------
 
 .head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-4);
   margin-bottom: var(--space-5);
 
   h1 {
@@ -109,18 +106,32 @@ $wide: 1680px; // the container widens here (see tokens), leaving room for a thi
   }
 }
 
+// Facts, then condition and title, on one line when there's room.
+.head-info {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-6);
+  margin-top: var(--space-3);
+
+  .head-meta {
+    margin-top: 0;
+  }
+}
+
 .head-tags {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2) var(--space-3);
-  margin-top: var(--space-4);
 }
 
 // --- Layout ----------------------------------------------------------------
 // Mobile: gallery → bid panel → details. Desktop: details left, sticky bid panel right.
-// Wide monitors: gallery | key facts | bid panel across the top (the wholesale
-// "everything above the fold" layout), then condition and history side by side.
+// From 1280px: gallery | key facts | bid panel across the top (the wholesale
+// "everything above the fold" layout), with condition and history under the
+// photo so neither column leaves a gap. A click opens the photos full screen,
+// so the inline gallery can be smaller.
 
 .columns {
   display: grid;
@@ -129,7 +140,8 @@ $wide: 1680px; // the container widens here (see tokens), leaving room for a thi
     'gallery'
     'panel'
     'facts'
-    'content';
+    'condition'
+    'history';
   gap: var(--space-5);
 
   @media (min-width: $desktop) {
@@ -137,15 +149,26 @@ $wide: 1680px; // the container widens here (see tokens), leaving room for a thi
     grid-template-areas:
       'gallery panel'
       'facts panel'
-      'content panel';
+      'condition panel'
+      'history panel';
     gap: var(--space-5) var(--space-6);
   }
 
-  @media (min-width: $wide) {
-    grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr) 400px;
+  // Facts and the panel span every row; any spare height goes to the last row, under the bid history.
+  @media (min-width: $three-col) {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr) 360px;
+    grid-template-rows: auto auto 1fr;
     grid-template-areas:
       'gallery facts panel'
-      'content content panel';
+      'condition facts panel'
+      'history facts panel';
+    gap: var(--space-5);
+    align-items: start;
+  }
+
+  @media (min-width: $wide) {
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.9fr) 400px;
+    gap: var(--space-5) var(--space-6);
   }
 }
 
@@ -175,18 +198,14 @@ $wide: 1680px; // the container widens here (see tokens), leaving room for a thi
   }
 }
 
-.content-area {
-  grid-area: content;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
+.condition-area {
+  grid-area: condition;
   min-width: 0;
+}
 
-  @media (min-width: $wide) {
-    display: grid;
-    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-    align-items: start;
-  }
+.history-area {
+  grid-area: history;
+  min-width: 0;
 }
 
 // --- Sections --------------------------------------------------------------

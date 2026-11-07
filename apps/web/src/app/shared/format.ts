@@ -87,10 +87,10 @@ export function gradeBand(grade: number): GradeBand {
   return { label: 'Rough', tone: 'danger' };
 }
 
-/** "420 km by road", "352 km away" for a straight-line fallback, or "Near you" in the same city. */
+/** "420 km" by road, "352 km away" for a straight-line fallback, or "Near you" in the same city. */
 export function formatDistance(km: number, basis: 'road' | 'straight_line' | null = null): string {
   if (km < 5) return 'Near you';
-  return basis === 'road' ? `${integer.format(km)} km by road` : `${integer.format(km)} km away`;
+  return basis === 'road' ? `${integer.format(km)} km` : `${integer.format(km)} km away`;
 }
 
 /** Long-form age for prose: "3 hours ago", "yesterday", "4 days ago". */

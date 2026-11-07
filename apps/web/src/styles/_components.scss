@@ -123,6 +123,11 @@
   }
 }
 
+.icon-btn--sm {
+  width: 32px;
+  height: 32px;
+}
+
 .link-btn {
   padding: 0;
   border: 0;
@@ -390,6 +395,11 @@ input[type='radio'] {
   color: var(--text);
   box-shadow: var(--shadow-lg);
   animation: dialog-in 0.18s var(--ease);
+}
+
+/* Full-screen photos: a near-black stage, whatever the theme. */
+.photo-viewer-backdrop {
+  background: rgb(5 8 15 / 0.96);
 }
 
 /* Room for side-by-side choices, e.g. payment and delivery when confirming a bid. */

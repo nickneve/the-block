@@ -39,3 +39,10 @@ export function photoTint(theme: Theme, exteriorColor?: string | null): PhotoTin
 export function tintedPhoto(src: string, tint: PhotoTint): string {
   return src.replace(PLACEHOLDER, `$1/${tint.background.slice(1)}/${tint.text.slice(1)}`);
 }
+
+const PLACEHOLDER_SIZE = /(placehold\.co\/)\d+x\d+/i;
+
+/** A larger render of a placeholder (sharp when shown full screen). Real photo URLs pass through untouched. */
+export function resizedPhoto(src: string, width: number, height: number): string {
+  return src.replace(PLACEHOLDER_SIZE, `$1${width}x${height}`);
+}

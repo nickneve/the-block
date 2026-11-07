@@ -22,7 +22,7 @@ import { BidderService } from '../../core/bidder.service';
 import { applyAuctionUpdate, LiveAuctionService } from '../../core/live-auction.service';
 import { ToastService } from '../../core/toast.service';
 import { ClockService } from '../../core/clock.service';
-import { formatAge, formatDateTime, formatDay, formatDistance, vehicleName } from '../../shared/format';
+import { formatDateTime, formatDay, formatDistance, provinceCode, vehicleName } from '../../shared/format';
 import { displayPrice, priceLabel } from '../../shared/lot-view';
 import { mapsUrl } from '../../shared/geo';
 import { paintColor } from '../../shared/paint';
@@ -32,7 +32,7 @@ import { MyStatusBadgeComponent, TitleBadgeComponent } from '../../shared/ui/bad
 import { ConditionGradeComponent } from '../../shared/ui/condition-grade.component';
 import { InViewDirective } from '../../shared/ui/in-view.directive';
 import { LotStatusComponent } from '../../shared/ui/lot-status.component';
-import { WatchButtonComponent } from '../../shared/ui/watch-button.component';
+import { AddToCalendarComponent } from '../../shared/ui/add-to-calendar.component';
 import { BidHistoryComponent } from './bid-history.component';
 import { BidPanelComponent } from './bid-panel.component';
 import { GalleryComponent } from './gallery.component';
@@ -52,7 +52,7 @@ type LoadState = 'loading' | 'ready' | 'not_found' | 'error';
     ConditionGradeComponent,
     TitleBadgeComponent,
     MyStatusBadgeComponent,
-    WatchButtonComponent,
+    AddToCalendarComponent,
     HumanizePipe,
     KmPipe,
     MoneyPipe,
@@ -88,10 +88,10 @@ export class VehicleDetailPage {
     const vehicle = this.vehicle();
     return vehicle ? vehicleName(vehicle) : '';
   });
-  protected readonly listed = computed(() => {
+  /** "Golden Horseshoe Motors, London, ON": where the car is picked up. */
+  protected readonly pickup = computed(() => {
     const vehicle = this.vehicle();
-    if (!vehicle) return null;
-    return { ago: formatAge(vehicle.listedAt, this.clock.now()), at: formatDateTime(vehicle.listedAt) };
+    return vehicle ? `${vehicle.sellingDealership}, ${vehicle.city}, ${provinceCode(vehicle.province)}` : '';
   });
   protected readonly closesAt = computed(() => {
     const vehicle = this.vehicle();
